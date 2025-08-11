@@ -1,4 +1,4 @@
-// File: /api/generate.js
+// File: /api/generate.js (Corrected Version)
 
 export default async function handler(request, response) {
   // 步骤 1: 确认请求方法是 POST
@@ -6,38 +6,37 @@ export default async function handler(request, response) {
     return response.status(405).json({ message: 'Only POST requests are allowed' });
   }
 
-  // 步骤 2: 从前端的请求中，安全地拿出它想呼叫的API和要发送的资料
-  const { targetApi, payload } = request.body;
-  
-  // 步骤 3: 从服务器的环境变数中，安全地读取我们的秘密 API 金钥
-  // (这个金钥之后会在 Vercel 网站上设定，所以不会暴露)
-  const API_KEY = process.env.GOOGLE_API_KEY;
-
-  if (!API_KEY) {
-    return response.status(500).json({ message: 'API key is not configured on the server.' });
-  }
-
-  // 步骤 4: 决定要去敲哪一扇门 (Gemini 还是 Imagen)
-  const API_URLS = {
-    gemini: `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${API_KEY}`,
-    imagen: `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${API_KEY}`
-  };
-
-  const targetUrl = API_URLS[targetApi];
-
-  if (!targetUrl) {
-    return response.status(400).json({ message: 'Invalid target API specified.' });
-  }
-
-  // 步骤 5: 代替前端，去向 Google 发送请求
   try {
+    // --- 重点修正在这里！ ---
+    // 我们现在告诉服务器，要先“拆开”包裹(await request.json())，再读取内容
+    const { targetApi, payload } = await request.json();
+    
+    // 步骤 3: 从服务器的环境变数中，安全地读取我们的秘密 API 金钥
+    const API_KEY = process.env.GOOGLE_API_KEY;
+
+    if (!API_KEY) {
+      return response.status(500).json({ message: 'API key is not configured on the server.' });
+    }
+
+    // 步骤 4: 决定要去敲哪一扇门 (Gemini 还是 Imagen)
+    const API_URLS = {
+      gemini: `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${API_KEY}`,
+      imagen: `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${API_KEY}`
+    };
+
+    const targetUrl = API_URLS[targetApi];
+
+    if (!targetUrl) {
+      return response.status(400).json({ message: 'Invalid target API specified.' });
+    }
+
+    // 步骤 5: 代替前端，去向 Google 发送请求
     const apiResponse = await fetch(targetUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     });
 
-    // 如果 Google 那边出错了，也告诉前端
     if (!apiResponse.ok) {
       const errorText = await apiResponse.text();
       return response.status(apiResponse.status).json({ message: 'Google API Error', details: errorText });
@@ -49,7 +48,8 @@ export default async function handler(request, response) {
     return response.status(200).json(data);
 
   } catch (error) {
-    // 如果中途网路不通，也告诉前端
-    return response.status(500).json({ message: 'An error occurred while fetching from Google API.', details: error.message });
+    // 如果中途发生任何错误 (比如包裹格式不对)，也告诉前端
+    console.error("Error in API Proxy:", error);
+    return response.status(500).json({ message: 'An error occurred within the API proxy.', details: error.message });
   }
 }
