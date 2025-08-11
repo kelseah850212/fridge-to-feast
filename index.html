@@ -203,10 +203,17 @@
             const urlRegex = /^(https?:\/\/)([^\s\/]+)(\S*)$/;
             if (!imageUrl || !urlRegex.test(imageUrl)) {
                 console.warn("AI returned an invalid or empty image URL:", imageUrl);
-                imageUrl = `https://placehold.co/600x400/CCCCCC/FFFFFF?text=Image+Not+Available`;
+                imageUrl = "https://placehold.co/600x400/f0f0f0/333333?Text=Image+Could+Not+Be+Loaded"; // 使用更明确的备用图片
             } else if (imageUrl.includes("placehold.co")) {
                 console.warn("AI returned a placeholder-like URL:", imageUrl);
-                imageUrl = `https://placehold.co/600x400/CCCCCC/FFFFFF?text=Image+Not+Available`;
+                imageUrl = "https://placehold.co/600x400/f0f0f0/333333?Text=Image+Could+Not+Be+Loaded"; // 替换掉可能是AI返回的占位符
+            } else if (!imageUrl.startsWith('https')) {
+                console.warn("AI returned a non-HTTPS URL:", imageUrl);
+                imageUrl = "https://placehold.co/600x400/f0f0f0/333333?Text=Image+Could+Not+Be+Loaded"; // 强制使用HTTPS备用图片
+            } else if (imageUrl.includes("wikimedia.org")) {
+                // 临时性地排除wikimedia，有时返回的链接不稳定
+                console.warn("Temporarily excluding Wikimedia URL:", imageUrl);
+                imageUrl = "https://placehold.co/600x400/f0f0f0/333333?Text=Image+Could+Not+Be+Loaded";
             }
 
             return imageUrl;
