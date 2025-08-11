@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fridge To Feast (Final)</title>
+    <title>Fridge To Feast (Working!)
+</title>
     <link rel="manifest" href="data:application/manifest+json;base64,ew0KICAibmFtZSI6ICJGcmlkZ2UgVG8gRmVhc3QiLA0KICAic2hvcnRfbmFtZSI6ICJGcmlkZ2VGZWFzdCIsDQogICJpY29ucyI6IFsNCiAgICB7DQogICAgICAic3JjIjogImh0dHBzOi8vcGxhY2Vob2xkLmNvLzE5MngxOTIvMDBBMDgwL0ZGRkZGRj90ZXh0PUYyRiIsDQogICAgICAidHlwZSI6ICJpbWFnZS9wbmciLA0KICAgICAgInNpemVzIjogIjE5MngxOTIiDQogICAgfSwNCiAgICB7DQogICAgICAic3JjIjogImh0dHBzOi8vcGxhY2Vob2xkLmNvLzUxMng1MTIvMDBBMDgwL0ZGRkZGRj90ZXh0PUYyRiIsDQogICAgICAidHlwZSI6ICJpbWFnZS9wbmciLA0KICAgICAgInNpemVzIjogIjUxMng1MTIiDQogICAgfQ0KICBdLA0KICAic3RhcnRfdXJsIjogIi4iLA0KICAiZGlzcGxheSI6ICJzdGFuZGFsb25lIiwNCiAgInRoZW1lX2NvbG9yIjogIiMxMEI5ODEiLA0KICAiYmFja2dyb3VuZF9jb2xvciI6ICIjRjlGQUZCIg0KfQ==">
     <meta name="theme-color" content="#10B981">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -138,7 +139,7 @@
                 if (!recipeData) throw new Error(translations[currentLanguage].error_recipe_gen);
                 
                 setLoading(true, translations[currentLanguage].generating_image);
-                const imageUrl = await findImageUrl(recipeData);
+                const imageUrl = await findImageUrl(recipeData); // 确认这里呼叫的是B计划的函数
                 
                 displayRecipe(recipeData, imageUrl);
             } catch (error) {
@@ -188,11 +189,7 @@
         async function generateRecipe(style, ingredients) { const langInstruction = currentLanguage === 'en' ? 'Respond in English.' : '請用中文回答。'; let prompt; const baseRule = `\n\n**Rules:**\n1. Steps must be logical for a home cook.\n2. Quantities must be reasonable.\nPlease respond STRICTLY in the following JSON format:\n- recipeName (string), description (string), calories (number), ingredients (array of {name, quantity}), instructions (array of strings).\n${langInstruction}`; if (style === translations[currentLanguage].ai_creative_style) { prompt = `You are an experienced home cook. Design a delicious, logical recipe based on these ingredients: ${ingredients}. Create a suitable name for it.` + baseRule; } else { prompt = `You are a professional chef. Provide a detailed, authentic recipe for '${style}'. Main ingredients are '${ingredients}'. The recipe name must be '${style}'.` + baseRule; } const payload = { contents: [{ parts: [{ text: prompt }] }], generationConfig: { responseMimeType: "application/json", responseSchema: { type: "OBJECT", properties: { recipeName: { type: "STRING" }, description: { type: "STRING" }, calories: { type: "NUMBER" }, ingredients: { type: "ARRAY", items: { type: "OBJECT", properties: { name: { type: "STRING" }, quantity: { type: "STRING" } }, required: ["name", "quantity"] } }, instructions: { type: "ARRAY", items: { type: "STRING" } } }, required: ["recipeName", "description", "calories", "ingredients", "instructions"] } } }; const result = await makeApiCallWithRetry('gemini', payload); const text = result?.candidates?.[0]?.content?.parts?.[0]?.text; if (text) { try { return JSON.parse(text); } catch(e) { console.error("Failed to parse recipe JSON:", text); throw new Error("AI returned invalid recipe format."); } } return null; }
         
         // --- B计划最终实现 ---
-        // 我们不再需要这个函数，因为新的图片寻找逻辑更简单
-        // async function generateImageWithArtDirector(recipeData, originalIngredients) { ... }
-        
         async function findImageUrl(recipeData) {
-            // 我们利用已有的食谱名称和描述，让AI去寻找一张合适的图片
             const { recipeName, description } = recipeData;
             const prompt = `You are an expert food image search assistant. Your task is to find a single, high-quality, royalty-free stock photo URL that best represents the following dish. The image should look delicious, realistic, and professionally shot. Prioritize public image sources like Unsplash, Pexels, or Wikipedia/Wikimedia Commons. Respond with ONLY the direct image URL and nothing else. Do not add any explanation or extra text.
 
@@ -200,18 +197,14 @@
             Description: "${description}"`;
 
             const payload = { contents: [{ parts: [{ text: prompt }] }] };
-            // 重点：我们呼叫 'gemini'，因为这是我们稳定可靠的文字AI
             const result = await makeApiCallWithRetry('gemini', payload);
-
             const imageUrl = result?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
 
-            // 做一个简单的网址验证
             if (imageUrl && (imageUrl.startsWith('http://') || imageUrl.startsWith('https://'))) {
                 return imageUrl;
             }
             
-            // 如果AI没有成功返回网址，我们就用一个备用图片
-            console.warn("Failed to find a valid image URL. Using fallback.");
+            console.warn("Failed to find a valid image URL from AI. Using fallback.");
             return `https://placehold.co/600x400/CCCCCC/FFFFFF?text=Image+Not+Available`;
         }
 
