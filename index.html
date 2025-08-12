@@ -234,12 +234,10 @@
             return resultContainer.querySelector('.bg-white');
         }
 
-        // v2.1 修正版: 增加容錯能力
         function populateRecipeCard(cardElement, data) {
             if (data.recipeName) cardElement.querySelector('#recipe-name').textContent = data.recipeName;
             if (data.calories) cardElement.querySelector('#recipe-calories').textContent = data.calories;
             
-            // 關鍵修正: 檢查 ingredients 是否為 Array
             if (data.ingredients && Array.isArray(data.ingredients)) {
                 const ingredientsList = cardElement.querySelector('#recipe-ingredients');
                 ingredientsList.innerHTML = '';
@@ -250,7 +248,6 @@
                 });
             }
 
-            // 關鍵修正: 檢查 instructions 是否為 Array
             if (data.instructions && Array.isArray(data.instructions)) {
                 const instructionsDiv = cardElement.querySelector('#recipe-instructions');
                 instructionsDiv.innerHTML = '';
