@@ -99,7 +99,7 @@
             '豆腐': 'https://images.pexels.com/photos/136745/pexels-photo-136745.jpeg',
             '饭': 'https://images.pexels.com/photos/1309413/pexels-photo-1309413.jpeg',
             '麵': 'https://images.pexels.com/photos/1279330/pexels-photo-1279330.jpeg',
-            '湯': 'https://images.pexels.com/photos/539451/pexels-photo-539451.jpeg',
+            '汤': 'https://images.pexels.com/photos/539451/pexels-photo-539451.jpeg',
             'default': 'https://images.pexels.com/photos/376464/pexels-photo-376464.jpeg'
         };
 
@@ -158,8 +158,7 @@
                 const imageUrl = getImageForRecipe(recipeData.recipeName); // No 'await' needed
                 
                 displayRecipe(recipeData, imageUrl);
-            } catch (error)
- {
+            } catch (error) {
                 console.error("Error in generateFinalRecipe:", error);
                 displayError(error.message);
             } finally {
@@ -209,6 +208,7 @@
         function getImageForRecipe(recipeName) {
             // 我们检查食谱名称包含哪个关键字，然后返回对应的图片
             for (const keyword in imageMap) {
+                if (keyword === 'default') continue; // Skip default case in loop
                 if (recipeName.includes(keyword)) {
                     return imageMap[keyword];
                 }
