@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fridge To Feast (v2.1 Streaming)</title>
+    <title>Fridge To Feast (v2.2 Stable Streaming)</title>
     <link rel="manifest" href="data:application/manifest+json;base64,ew0KICAibmFtZSI6ICJGcmlkZ2UgVG8gRmVhc3QiLA0KICAic2hvcnRfbmFtZSI6ICJGcmlkZ2VGZWFzdCIsDQogICJpY29ucyI6IFsNCiAgICB7DQogICAgICAic3JjIjogImh0dHBzOi8vcGxhY2Vob2xkLmNvLzE5MngxOTIvMDBBMDgwL0ZGRkZGRj90ZXh0PUYyRiIsDQogICAgICAidHlwZSI6ICJpbWFnZS9wbmciLA0KICAgICAgInNpemVzIjogIjE5MngxOTIiDQogICAgfSwNCiAgICB7DQogICAgICAic3JjIjogImh0dHBzOi8vcGxhY2Vob2xkLmNvLzUxMng1MTIvMDBBMDgwL0ZGRkZGRj90ZXh0PUYyRiIsDQogICAgICAidHlwZSI6ICJpbWFnZS9wbmciLA0KICAgICAgInNpemVzIjogIjUxMng1MTIiDQogICAgfQ0KICBdLA0KICAic3RhcnRfdXJsIjogIi4iLA0KICAiZGlzcGxheSI6ICJzdGFuZGFsb25lIiwNCiAgInRoZW1lX2NvbG9yIjogIiMxMEI5ODEiLA0KICAiYmFja2dyb3VuZF9jb2xvciI6ICIjRjlGQUZCIg0KfQ==">
     <meta name="theme-color" content="#10B981">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -20,7 +20,6 @@
             border-color: #10B981;
             box-shadow: 0 2px 6px rgba(16, 185, 129, 0.3);
         }
-        /* 游標閃爍效果 */
         .blinking-cursor {
             font-weight: 500;
             animation: blink 1s step-end infinite;
@@ -243,8 +242,10 @@
                 ingredientsList.innerHTML = '';
                 data.ingredients.forEach(item => {
                     const li = document.createElement('li');
-                    li.textContent = `${item.name} - ${item.quantity}`;
-                    ingredientsList.appendChild(li);
+                    if(item.name && item.quantity) {
+                        li.textContent = `${item.name} - ${item.quantity}`;
+                        ingredientsList.appendChild(li);
+                    }
                 });
             }
 
@@ -259,7 +260,7 @@
             }
         }
 
-        // --- API HELPERS (v2.1 Streaming) ---
+        // --- API HELPERS (v2.2 Stable Streaming) ---
         async function makeApiCallWithRetry(targetApi, payload, maxRetries = 3) {
             let attempt = 0;
             while (attempt < maxRetries) {
@@ -338,29 +339,18 @@
             let fullText = '';
 
             const nameEl = cardElement.querySelector('#recipe-name');
-            nameEl.innerHTML = '<span class="blinking-cursor">|</span>';
+            nameEl.innerHTML = `生成中... <span class="blinking-cursor">|</span>`;
 
             while (true) {
                 const { value, done } = await reader.read();
                 if (done) break;
                 
                 let chunk = decoder.decode(value, { stream: true });
-                // Google的串流有時會包含 "data: " 前綴和方括號，我們需要處理它
                 chunk = chunk.replace(/^data: /, '').trim();
                 if (chunk.startsWith('[') && chunk.endsWith(']')) {
                     chunk = chunk.slice(1, -1);
                 }
                 fullText += chunk;
-                
-                try {
-                    const parsedData = JSON.parse(fullText);
-                    populateRecipeCard(cardElement, parsedData);
-                } catch (e) {
-                    let partialName = fullText.match(/"recipeName":\s*"([^"]*)/);
-                    if (partialName && partialName[1]) {
-                        nameEl.innerHTML = partialName[1] + '<span class="blinking-cursor">|</span>';
-                    }
-                }
             }
             
             try {
