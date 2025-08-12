@@ -1,4 +1,4 @@
-// File: /api/generate.js (v2.1 - Final Corrected Version)
+// File: /api/generate.js (v2.2 - Stable Aggregating Version)
 
 // 使用最穩定、兼容性最好的 CommonJS 語法
 module.exports = async (request, response) => {
@@ -23,10 +23,10 @@ module.exports = async (request, response) => {
       return response.status(500).json({ message: 'API key is not configured on the server.' });
     }
 
-    // 我們的通訊錄，現在同時有普通和串流的地址
+    // 我們的通訊錄
     const API_URLS = {
-      geminiStream: `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:streamGenerateContent?key=${API_KEY}`,
-      gemini: `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${API_KEY}`,
+      // 我們在後端使用串流來加速，但會組合好再回傳
+      gemini: `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:streamGenerateContent?key=${API_KEY}`,
       imagen: `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${API_KEY}`
     };
 
@@ -50,31 +50,44 @@ module.exports = async (request, response) => {
       return response.status(apiResponse.status).json({ message: 'Google API Error', details: errorText });
     }
 
-    // 如果是串流請求，就用“直播”的方式回傳
-    if (targetApi === 'geminiStream') {
-      response.setHeader('Content-Type', 'text/event-stream; charset=utf-8');
-      response.setHeader('Cache-Control', 'no-cache');
-      response.setHeader('Connection', 'keep-alive');
-
-      const reader = apiResponse.body.getReader();
-      const decoder = new TextDecoder('utf-8');
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) {
-          break;
-        }
-        response.write(decoder.decode(value));
-      }
-      response.end();
-    } else {
-      // 如果是普通的請求，就一次性回傳
+    // 如果是圖片請求，直接回傳結果
+    if (targetApi === 'imagen') {
       const data = await apiResponse.json();
       return response.status(200).json(data);
     }
 
+    // 如果是文字請求，由後端負責組合串流
+    const reader = apiResponse.body.getReader();
+    const decoder = new TextDecoder();
+    let fullText = '';
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      fullText += decoder.decode(value, { stream: true });
+    }
+
+    // 清理並組合串流數據塊
+    const jsonChunks = fullText.trim().split('data: ').filter(Boolean);
+    let combinedText = '';
+    jsonChunks.forEach(chunk => {
+        try {
+            const parsed = JSON.parse(chunk);
+            combinedText += parsed.candidates[0].content.parts[0].text;
+        } catch (e) {
+            // 忽略無法解析的數據塊
+        }
+    });
+
+    // 將最終組合好的、乾淨的JSON物件回傳給前端
+    try {
+        const finalJson = JSON.parse(combinedText);
+        return response.status(200).json(finalJson);
+    } catch(e) {
+        console.error("Failed to parse combined text from stream:", combinedText);
+        return response.status(500).json({ message: 'Failed to parse AI response stream.' });
+    }
+
   } catch (error) {
-    // 捕捉所有未預料的錯誤
     console.error("Fatal Error in API Proxy:", error);
     if (!response.headersSent) {
         response.status(500).json({ message: 'An unexpected error occurred within the API proxy.', details: error.message });

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fridge To Feast (v2.2 Stable Streaming)</title>
+    <title>Fridge To Feast (簡化版)</title>
     <link rel="manifest" href="data:application/manifest+json;base64,ew0KICAibmFtZSI6ICJGcmlkZ2UgVG8gRmVhc3QiLA0KICAic2hvcnRfbmFtZSI6ICJGcmlkZ2VGZWFzdCIsDQogICJpY29ucyI6IFsNCiAgICB7DQogICAgICAic3JjIjogImh0dHBzOi8vcGxhY2Vob2xkLmNvLzE5MngxOTIvMDBBMDgwL0ZGRkZGRj90ZXh0PUYyRiIsDQogICAgICAidHlwZSI6ICJpbWFnZS9wbmciLA0KICAgICAgInNpemVzIjogIjE5MngxOTIiDQogICAgfSwNCiAgICB7DQogICAgICAic3JjIjogImh0dHBzOi8vcGxhY2Vob2xkLmNvLzUxMng1MTIvMDBBMDgwL0ZGRkZGRj90ZXh0PUYyRiIsDQogICAgICAidHlwZSI6ICJpbWFnZS9wbmciLA0KICAgICAgInNpemVzIjogIjUxMng1MTIiDQogICAgfQ0KICBdLA0KICAic3RhcnRfdXJsIjogIi4iLA0KICAiZGlzcGxheSI6ICJzdGFuZGFsb25lIiwNCiAgInRoZW1lX2NvbG9yIjogIiMxMEI5ODEiLA0KICAiYmFja2dyb3VuZF9jb2xvciI6ICIjRjlGQUZCIg0KfQ==">
     <meta name="theme-color" content="#10B981">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -13,43 +13,22 @@
         body { font-family: 'Poppins', 'Noto Sans TC', sans-serif; }
         .style-btn { transition: all 0.2s ease-in-out; }
         .style-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-        .preference-btn { transition: all 0.2s ease-in-out; }
-        .preference-btn.active {
-            background-color: #10B981;
-            color: white;
-            border-color: #10B981;
-            box-shadow: 0 2px 6px rgba(16, 185, 129, 0.3);
-        }
-        .blinking-cursor {
-            font-weight: 500;
-            animation: blink 1s step-end infinite;
-        }
-        @keyframes blink {
-            from, to { color: transparent; }
-            50% { color: #333; }
-        }
     </style>
 </head>
 <body class="bg-gray-50">
 
     <div class="container mx-auto max-w-2xl p-4 relative pb-24">
-        <button id="lang-switcher" class="absolute top-4 right-4 text-sm font-semibold text-gray-600 hover:text-green-500 py-2 px-3 bg-white rounded-lg shadow-sm border">English</button>
         <header class="text-center my-8">
-            <h1 class="text-4xl font-bold text-gray-800" data-translate="main_title">Fridge To Feast</h1>
-            <p class="text-gray-500 mt-2" data-translate="subtitle">輸入食材找靈感，或直接搜尋菜名！</p>
+            <h1 class="text-4xl font-bold text-gray-800">Fridge To Feast</h1>
+            <p class="text-gray-500 mt-2">輸入食材找靈感，或直接搜尋菜名！</p>
         </header>
         <div class="bg-white p-6 rounded-xl shadow-md">
             <div class="flex items-center border-2 border-gray-200 rounded-lg focus-within:border-green-500 transition-colors">
                 <i class="fas fa-utensils text-gray-400 mx-3"></i>
-                <input type="text" id="main-input" class="w-full p-3 outline-none">
+                <input type="text" id="main-input" class="w-full p-3 outline-none" placeholder="例如: 雞蛋, 番茄">
                 <button id="start-btn" class="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-r-lg transition-colors">
-                    <i class="fas fa-search mr-2"></i><span data-translate="start_button">開始</span>
+                    <i class="fas fa-search mr-2"></i><span>開始</span>
                 </button>
-            </div>
-            <div id="preferences-container" class="mt-4 flex flex-wrap justify-center gap-3">
-                <button class="preference-btn py-2 px-4 bg-white border-2 border-gray-200 rounded-full text-sm font-semibold text-gray-600" data-preference="vegetarian" data-translate="pref_vegetarian">素食</button>
-                <button class="preference-btn py-2 px-4 bg-white border-2 border-gray-200 rounded-full text-sm font-semibold text-gray-600" data-preference="low-calorie" data-translate="pref_low_calorie">低熱量</button>
-                <button class="preference-btn py-2 px-4 bg-white border-2 border-gray-200 rounded-full text-sm font-semibold text-gray-600" data-preference="spicy" data-translate="pref_spicy">要辣</button>
             </div>
         </div>
         <div id="result-container" class="mt-8"></div>
@@ -58,34 +37,31 @@
     <!-- Templates -->
     <template id="style-selection-template">
         <div class="bg-white p-6 rounded-xl shadow-md">
-            <h3 class="text-xl font-bold text-gray-700 mb-4 text-center" data-translate="how_to_cook">你想怎麼煮？</h3>
+            <h3 class="text-xl font-bold text-gray-700 mb-4 text-center">你想怎麼煮？</h3>
             <div id="style-buttons-container" class="grid grid-cols-2 sm:grid-cols-3 gap-4"></div>
         </div>
     </template>
     <template id="recipe-card-template">
         <div class="bg-white p-6 rounded-xl shadow-lg relative">
-            <div class="relative"><img id="recipe-image" src="" alt="Recipe Image" class="w-full h-64 object-cover rounded-lg mb-6 shadow-md"><div class="absolute bottom-2 right-2 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded" data-translate="image_ref_note">图片只供参考</div></div>
+            <div class="relative"><img id="recipe-image" src="" alt="Recipe Image" class="w-full h-64 object-cover rounded-lg mb-6 shadow-md"><div class="absolute bottom-2 right-2 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded">图片只供参考</div></div>
             <h2 id="recipe-name" class="text-3xl font-bold text-gray-800 mb-2"></h2>
-            <p class="text-gray-600 mb-4"><i class="fas fa-fire-alt mr-2 text-red-500"></i><span data-translate="calories_label">預估卡路里</span>: <span id="recipe-calories"></span> <span class="text-xs text-gray-400" data-translate="calories_note">(估算值)</span></p>
-            <div class="mt-6"><h3 class="text-xl font-semibold text-gray-700 border-b-2 border-green-500 pb-2 mb-4" data-translate="ingredients_label">所需食材</h3><ul id="recipe-ingredients" class="list-disc list-inside space-y-2 text-gray-600"></ul></div>
-            <div class="mt-6"><h3 class="text-xl font-semibold text-gray-700 border-b-2 border-green-500 pb-2 mb-4" data-translate="instructions_label">做法</h3><div id="recipe-instructions" class="space-y-3 text-gray-600 leading-relaxed"></div></div>
+            <p class="text-gray-600 mb-4"><i class="fas fa-fire-alt mr-2 text-red-500"></i>預估卡路里: <span id="recipe-calories"></span> <span class="text-xs text-gray-400">(估算值)</span></p>
+            <div class="mt-6"><h3 class="text-xl font-semibold text-gray-700 border-b-2 border-green-500 pb-2 mb-4">所需食材</h3><ul id="recipe-ingredients" class="list-disc list-inside space-y-2 text-gray-600"></ul></div>
+            <div class="mt-6"><h3 class="text-xl font-semibold text-gray-700 border-b-2 border-green-500 pb-2 mb-4">做法</h3><div id="recipe-instructions" class="space-y-3 text-gray-600 leading-relaxed"></div></div>
         </div>
     </template>
     <template id="error-message-template">
-         <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-lg" role="alert"><p class="font-bold" data-translate="error_title">噢不，出錯了！</p><p id="error-text"></p></div>
+         <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-lg" role="alert"><p class="font-bold">噢不，出錯了！</p><p id="error-text"></p></div>
     </template>
 
     <script>
-        // --- STABILITY: Global Error Handler ---
+        // --- 全局錯誤處理 ---
         window.onerror = function(message, source, lineno, colno, error) {
             console.error("A global error was caught:", message, error);
             try {
                 const resultContainer = document.getElementById('result-container');
                 if (resultContainer) {
-                    const lang = localStorage.getItem('fridgeToFeastLang') || 'zh';
-                    const errorTitle = lang === 'zh' ? '噢不，發生了未知的錯誤！' : 'An unexpected error occurred!';
-                    const errorMessage = lang === 'zh' ? '請稍後再試或重新整理頁面。' : 'Please try again later or refresh the page.';
-                    resultContainer.innerHTML = `<div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-lg" role="alert"><p class="font-bold">${errorTitle}</p><p>${errorMessage}</p></div>`;
+                    resultContainer.innerHTML = `<div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-lg" role="alert"><p class="font-bold">噢不，發生了未知的錯誤！</p><p>請稍後再試或重新整理頁面。</p></div>`;
                 }
             } catch (e) {
                 console.error("Could not display global error message:", e);
@@ -93,89 +69,61 @@
             return true;
         };
 
-        // --- I18N ---
-        const translations = {
-            zh: { lang_switcher: "English", main_title: "Fridge To Feast", subtitle: "輸入食材找靈感，或直接搜尋菜名！", input_placeholder: "例如: 雞蛋, 番茄", start_button: "開始", thinking: "思考中...", generating_recipe: "生成食譜中...", generating_image: "繪製圖片中...", art_director: "聘請造型師...", how_to_cook: "你想怎麼煮？", ai_creative_style: "AI創意煮法", image_ref_note: "图片只供参考", calories_label: "預估卡路里", calories_note: "(估算值)", ingredients_label: "所需食材", instructions_label: "做法", error_title: "噢不，出錯了！", error_input_required: "請輸入食材或菜名！", error_generic: "無法處理您的請求，請稍後再試。", error_recipe_gen: "生成食譜失敗，請稍後再試。", step_label: "步驟", pref_vegetarian: "素食", pref_low_calorie: "低熱量", pref_spicy: "要辣" },
-            en: { lang_switcher: "中文", main_title: "Fridge To Feast", subtitle: "Enter ingredients for ideas, or search for a recipe directly!", input_placeholder: "e.g., egg, tomato", start_button: "Start", thinking: "Thinking...", generating_recipe: "Generating Recipe...", generating_image: "Creating Image...", art_director: "Hiring Art Director...", how_to_cook: "How would you like to cook it?", ai_creative_style: "AI Creative Style", image_ref_note: "Image for reference only", calories_label: "Est. Calories", calories_note: "(approx.)", ingredients_label: "Ingredients", instructions_label: "Instructions", error_title: "Oh no, an error occurred!", error_input_required: "Please enter ingredients or a recipe name!", error_generic: "Could not process your request. Please try again later.", error_recipe_gen: "Failed to generate recipe. Please try again later.", step_label: "Step", pref_vegetarian: "Vegetarian", pref_low_calorie: "Low-Calorie", pref_spicy: "Spicy" }
-        };
-        let currentLanguage = localStorage.getItem('fridgeToFeastLang') || 'zh';
-
-        // --- DOM ELEMENTS ---
+        // --- DOM 元素 ---
         const mainInput = document.getElementById('main-input');
         const startBtn = document.getElementById('start-btn');
         const resultContainer = document.getElementById('result-container');
-        const langSwitcherBtn = document.getElementById('lang-switcher');
-        const preferencesContainer = document.getElementById('preferences-container');
-        const templates = { styleSelection: document.getElementById('style-selection-template'), recipeCard: document.getElementById('recipe-card-template'), error: document.getElementById('error-message-template'), };
+        const templates = {
+            styleSelection: document.getElementById('style-selection-template'),
+            recipeCard: document.getElementById('recipe-card-template'),
+            error: document.getElementById('error-message-template'),
+        };
 
-        // --- INITIALIZATION ---
+        // --- 初始化 ---
         document.addEventListener('DOMContentLoaded', () => {
-            setLanguage(currentLanguage);
             startBtn.addEventListener('click', () => handleInitialInput(mainInput.value));
-            mainInput.addEventListener('keyup', (event) => { if (event.key === 'Enter') handleInitialInput(mainInput.value); });
-            langSwitcherBtn.addEventListener('click', () => { const newLang = currentLanguage === 'zh' ? 'en' : 'zh'; setLanguage(newLang); });
-            preferencesContainer.addEventListener('click', (event) => {
-                if (event.target.classList.contains('preference-btn')) {
-                    event.target.classList.toggle('active');
-                }
+            mainInput.addEventListener('keyup', (event) => {
+                if (event.key === 'Enter') handleInitialInput(mainInput.value);
             });
         });
 
-        // --- LANGUAGE FUNCTIONS ---
-        function setLanguage(lang) {
-            currentLanguage = lang;
-            localStorage.setItem('fridgeToFeastLang', lang);
-            document.documentElement.lang = lang;
-            document.querySelectorAll('[data-translate]').forEach(el => {
-                const key = el.getAttribute('data-translate');
-                if (translations[lang][key]) { el.textContent = translations[lang][key]; }
-            });
-            langSwitcherBtn.textContent = translations[lang].lang_switcher;
-            mainInput.placeholder = translations[lang].input_placeholder;
-        }
-
-        // --- HELPER FUNCTIONS ---
-        function getSelectedPreferences() {
-            const activeButtons = preferencesContainer.querySelectorAll('.preference-btn.active');
-            return Array.from(activeButtons).map(btn => btn.textContent);
-        }
-
-        // --- MAIN LOGIC ---
+        // --- 主要邏輯 ---
         async function handleInitialInput(userInput) {
             const trimmedInput = userInput.trim();
             if (!trimmedInput) {
-                displayError(translations[currentLanguage].error_input_required);
+                displayError("請輸入食材或菜名！");
                 return;
             }
-            setLoading(true, translations[currentLanguage].thinking);
-            const preferences = getSelectedPreferences();
+            setLoading(true, "思考中...");
+            
             try {
                 const inputType = await determineInputType(trimmedInput);
                 if (inputType === 'recipe_name') {
-                    await generateFinalRecipe(trimmedInput, trimmedInput, preferences);
+                    await generateFinalRecipe(trimmedInput, trimmedInput);
                 } else {
-                    const styles = await getCookingStyles(trimmedInput, preferences);
-                    displayCookingStyles(styles, trimmedInput, preferences);
+                    const styles = await getCookingStyles(trimmedInput);
+                    displayCookingStyles(styles, trimmedInput);
                 }
             } catch (error) {
                 console.error("Critical Error in Main Flow:", error);
-                displayError(error.message || translations[currentLanguage].error_generic);
+                displayError(error.message || "無法處理您的請求，請稍後再試。");
                 setLoading(false);
             }
         }
 
-        async function generateFinalRecipe(style, ingredients, preferences) {
+        async function generateFinalRecipe(style, ingredients) {
             try {
-                setLoading(true, translations[currentLanguage].generating_recipe);
-                
-                const emptyCard = displayEmptyRecipeCard();
-                
-                const recipeData = await streamAndParseRecipe(style, ingredients, preferences, emptyCard);
-                if (!recipeData) throw new Error(translations[currentLanguage].error_recipe_gen);
+                setLoading(true, "生成食譜中...");
+                const recipeData = await generateRecipe(style, ingredients);
+                if (!recipeData) throw new Error("生成食譜失敗，請稍後再試。");
 
-                setLoading(true, translations[currentLanguage].art_director);
+                displayRecipe(recipeData, 'https://placehold.co/600x400/f0f0f0/f0f0f0?text=+');
+
+                setLoading(true, "聘請造型師...");
                 const imageUrl = await generateImageWithArtDirector(recipeData, ingredients);
-                emptyCard.querySelector('#recipe-image').src = imageUrl;
+                
+                const imageEl = resultContainer.querySelector('#recipe-image');
+                if (imageEl) imageEl.src = imageUrl;
 
             } catch (error) {
                 console.error("Error in generateFinalRecipe:", error);
@@ -185,37 +133,36 @@
             }
         }
 
-        // --- UI DISPLAY ---
+        // --- 介面顯示 ---
         function setLoading(isLoading, message) {
             startBtn.disabled = isLoading;
-            startBtn.querySelector('span').textContent = isLoading ? message : translations[currentLanguage].start_button;
-            if (isLoading && message === translations[currentLanguage].thinking) {
+            startBtn.querySelector('span').textContent = isLoading ? message : "開始";
+            if (isLoading && message === "思考中...") {
                 resultContainer.innerHTML = '';
             }
         }
+
         function displayError(message) {
             resultContainer.innerHTML = '';
             const errorCard = templates.error.content.cloneNode(true);
-            const titleEl = errorCard.querySelector('[data-translate="error_title"]');
-            if (titleEl) titleEl.textContent = translations[currentLanguage].error_title;
             errorCard.getElementById('error-text').textContent = message;
             resultContainer.appendChild(errorCard);
         }
-        function displayCookingStyles(styles, ingredients, preferences) {
+
+        function displayCookingStyles(styles, ingredients) {
             resultContainer.innerHTML = '';
             const styleCard = templates.styleSelection.content.cloneNode(true);
             const container = styleCard.getElementById('style-buttons-container');
-            styleCard.querySelector('[data-translate="how_to_cook"]').textContent = translations[currentLanguage].how_to_cook;
             styles.forEach(style => {
                 const button = document.createElement('button');
                 button.textContent = style;
                 button.className = 'style-btn w-full bg-white p-4 rounded-lg shadow border-2 border-gray-200 hover:border-green-500 hover:text-green-600 font-semibold';
-                if (style === translations['zh'].ai_creative_style || style === translations['en'].ai_creative_style) {
+                if (style === "AI創意煮法") {
                     button.classList.add('bg-green-100', 'text-green-700');
                 }
                 button.onclick = () => {
                     resultContainer.innerHTML = `<div class="bg-white p-6 rounded-xl shadow-md"><div class="bg-gray-200 h-64 w-full rounded-lg animate-pulse"></div><div class="h-8 bg-gray-200 rounded w-3/4 mt-6 animate-pulse"></div></div>`;
-                    generateFinalRecipe(style, ingredients, preferences);
+                    generateFinalRecipe(style, ingredients);
                 };
                 container.appendChild(button);
             });
@@ -223,44 +170,41 @@
             setLoading(false);
         }
         
-        function displayEmptyRecipeCard() {
+        function displayRecipe(data, imageUrl) {
             resultContainer.innerHTML = '';
-            const card = templates.recipeCard.content.cloneNode(true);
-            card.querySelector('[data-translate="ingredients_label"]').textContent = translations[currentLanguage].ingredients_label;
-            card.querySelector('[data-translate="instructions_label"]').textContent = translations[currentLanguage].instructions_label;
-            card.querySelector('#recipe-image').src = 'https://placehold.co/600x400/f0f0f0/f0f0f0?text=+';
-            resultContainer.appendChild(card);
-            return resultContainer.querySelector('.bg-white');
-        }
-
-        function populateRecipeCard(cardElement, data) {
-            if (data.recipeName) cardElement.querySelector('#recipe-name').textContent = data.recipeName;
-            if (data.calories) cardElement.querySelector('#recipe-calories').textContent = data.calories;
+            const cardTemplate = templates.recipeCard.content.cloneNode(true);
+            const cardElement = cardTemplate.querySelector('.bg-white');
             
+            cardElement.querySelector('#recipe-image').src = imageUrl;
+            cardElement.querySelector('#recipe-name').textContent = data.recipeName || '';
+            cardElement.querySelector('#recipe-calories').textContent = data.calories || '';
+            
+            const ingredientsList = cardElement.querySelector('#recipe-ingredients');
+            ingredientsList.innerHTML = '';
             if (data.ingredients && Array.isArray(data.ingredients)) {
-                const ingredientsList = cardElement.querySelector('#recipe-ingredients');
-                ingredientsList.innerHTML = '';
                 data.ingredients.forEach(item => {
                     const li = document.createElement('li');
-                    if(item.name && item.quantity) {
+                    if (item.name && item.quantity) {
                         li.textContent = `${item.name} - ${item.quantity}`;
                         ingredientsList.appendChild(li);
                     }
                 });
             }
 
+            const instructionsDiv = cardElement.querySelector('#recipe-instructions');
+            instructionsDiv.innerHTML = '';
             if (data.instructions && Array.isArray(data.instructions)) {
-                const instructionsDiv = cardElement.querySelector('#recipe-instructions');
-                instructionsDiv.innerHTML = '';
                 data.instructions.forEach((step, index) => {
                     const p = document.createElement('p');
-                    p.innerHTML = `<strong class="text-green-600">${translations[currentLanguage].step_label} ${index + 1}:</strong> ${step}`;
+                    p.innerHTML = `<strong class="text-green-600">步驟 ${index + 1}:</strong> ${step}`;
                     instructionsDiv.appendChild(p);
                 });
             }
+            
+            resultContainer.appendChild(cardTemplate);
         }
 
-        // --- API HELPERS (v2.2 Stable Streaming) ---
+        // --- API 呼叫 (後端代理) ---
         async function makeApiCallWithRetry(targetApi, payload, maxRetries = 3) {
             let attempt = 0;
             while (attempt < maxRetries) {
@@ -284,6 +228,7 @@
             }
         }
         
+        // --- AI 提示 (Prompts) ---
         async function determineInputType(userInput) { 
             const prompt = `Analyze the following text and determine if it's a 'list of ingredients' or a 'recipe name'. Text: "${userInput}". Respond with only "ingredients" or "recipe_name".`; 
             const payload = { contents: [{ parts: [{ text: prompt }] }] }; 
@@ -293,10 +238,8 @@
             return userInput.includes(',') || userInput.split(' ').length > 2 ? 'ingredients' : 'recipe_name'; 
         }
         
-        async function getCookingStyles(ingredients, preferences) {
-            const langInstruction = currentLanguage === 'en' ? 'English' : 'Chinese';
-            const preferenceText = preferences.length > 0 ? ` considering these preferences: ${preferences.join(', ')}` : '';
-            const prompt = `In JSON array format, list the 4 most popular classic dish names for '${ingredients}' in the Malaysia/Singapore region${preferenceText}. Respond in ${langInstruction}. Example: ["Style A", "Style B"]`;
+        async function getCookingStyles(ingredients) {
+            const prompt = `In JSON array format, list the 4 most popular classic dish names for '${ingredients}' in the Malaysia/Singapore region. Respond in Chinese. Example: ["Style A", "Style B"]`;
             const payload = { contents: [{ parts: [{ text: prompt }] }], generationConfig: { responseMimeType: "application/json" } };
             const result = await makeApiCallWithRetry('gemini', payload);
             const text = result?.candidates?.[0]?.content?.parts?.[0]?.text;
@@ -307,63 +250,22 @@
             } catch {
                 styles = [];
             }
-            styles.push(translations[currentLanguage].ai_creative_style);
+            styles.push("AI創意煮法");
             return styles;
         }
 
-        function generateRecipePayload(style, ingredients, preferences) {
-            const langInstruction = currentLanguage === 'en' ? 'Respond in English.' : '請用中文回答。';
-            const preferenceText = preferences.length > 0 ? `\n3. CRITICAL: The recipe MUST strictly adhere to the following dietary preferences: ${preferences.join(', ')}.` : '';
-            const baseRule = `\n\n**Rules:**\n1. Steps must be logical for a home cook.\n2. Quantities must be reasonable.${preferenceText}\nPlease respond STRICTLY in the following JSON format:\n- recipeName (string), description (string), calories (number), ingredients (array of {name, quantity}), instructions (array of strings).\n${langInstruction}`;
+        async function generateRecipe(style, ingredients) {
+            const baseRule = `\n\n**Rules:**\n1. Steps must be logical for a home cook.\n2. Quantities must be reasonable.\nPlease respond STRICTLY in the following JSON format:\n- recipeName (string), description (string), calories (number), ingredients (array of {name, quantity}), instructions (array of strings).\n請用中文回答。`;
             let prompt;
-            if (style === translations[currentLanguage].ai_creative_style) {
+            if (style === "AI創意煮法") {
                 prompt = `You are an experienced home cook. Design a delicious, logical recipe based on these ingredients: ${ingredients}. Create a suitable name for it.` + baseRule;
             } else {
                 prompt = `You are a professional chef. Provide a detailed, authentic recipe for '${style}'. Main ingredients are '${ingredients}'. The recipe name must be '${style}'.` + baseRule;
             }
-            return { contents: [{ parts: [{ text: prompt }] }], generationConfig: { responseMimeType: "application/json" } };
+            const payload = { contents: [{ parts: [{ text: prompt }] }], generationConfig: { responseMimeType: "application/json" } };
+            return await makeApiCallWithRetry('gemini', payload);
         }
 
-        async function streamAndParseRecipe(style, ingredients, preferences, cardElement) {
-            const payload = generateRecipePayload(style, ingredients, preferences);
-            const response = await fetch('/api/generate', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ targetApi: 'geminiStream', payload: payload })
-            });
-
-            if (!response.ok) { throw new Error(`API Stream Error ${response.status}`); }
-
-            const reader = response.body.getReader();
-            const decoder = new TextDecoder();
-            let fullText = '';
-
-            const nameEl = cardElement.querySelector('#recipe-name');
-            nameEl.innerHTML = `生成中... <span class="blinking-cursor">|</span>`;
-
-            while (true) {
-                const { value, done } = await reader.read();
-                if (done) break;
-                
-                let chunk = decoder.decode(value, { stream: true });
-                chunk = chunk.replace(/^data: /, '').trim();
-                if (chunk.startsWith('[') && chunk.endsWith(']')) {
-                    chunk = chunk.slice(1, -1);
-                }
-                fullText += chunk;
-            }
-            
-            try {
-                const finalData = JSON.parse(fullText);
-                populateRecipeCard(cardElement, finalData);
-                return finalData;
-            } catch (e) {
-                console.error("Failed to parse final JSON from stream:", fullText, e);
-                throw new Error("AI returned invalid recipe format.");
-            }
-        }
-
-        // --- Plan A - Image Generation Functions ---
         async function generateImageWithArtDirector(recipeData, originalIngredients) {
             const artDirectorPrompt = await createVisualPrompt(recipeData.recipeName, originalIngredients);
             if (!artDirectorPrompt) {
@@ -371,7 +273,7 @@
                 const fallbackPrompt = `Professional food photography of a dish named '${recipeData.recipeName}' with main ingredients '${originalIngredients}'.`;
                 return await generateImage(fallbackPrompt);
             }
-            setLoading(true, translations[currentLanguage].generating_image);
+            setLoading(true, "繪製圖片中...");
             return await generateImage(artDirectorPrompt);
         }
 
