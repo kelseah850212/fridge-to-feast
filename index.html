@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fridge To Feast (Polished)</title>
+    <title>Fridge To Feast (Final Version)</title>
     <link rel="manifest" href="data:application/manifest+json;base64,ew0KICAibmFtZSI6ICJGcmlkZ2UgVG8gRmVhc3QiLA0KICAic2hvcnRfbmFtZSI6ICJGcmlkZ2VGZWFzdCIsDQogICJpY29ucyI6IFsNCiAgICB7DQogICAgICAic3JjIjogImh0dHBzOi8vcGxhY2Vob2xkLmNvLzE5MngxOTIvMDBBMDgwL0ZGRkZGRj90ZXh0PUYyRiIsDQogICAgICAidHlwZSI6ICJpbWFnZS9wbmciLA0KICAgICAgInNpemVzIjogIjE5MngxOTIiDQogICAgfSwNCiAgICB7DQogICAgICAic3JjIjogImh0dHBzOi8vcGxhY2Vob2xkLmNvLzUxMng1MTIvMDBBMDgwL0ZGRkZGRj90ZXh0PUYyRiIsDQogICAgICAidHlwZSI6ICJpbWFnZS9wbmciLA0KICAgICAgInNpemVzIjogIjUxMng1MTIiDQogICAgfQ0KICBdLA0KICAic3RhcnRfdXJsIjogIi4iLA0KICAiZGlzcGxheSI6ICJzdGFuZGFsb25lIiwNCiAgInRoZW1lX2NvbG9yIjogIiMxMEI5ODEiLA0KICAiYmFja2dyb3VuZF9jb2xvciI6ICIjRjlGQUZCIg0KfQ==">
     <meta name="theme-color" content="#10B981">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -86,6 +86,23 @@
         const langSwitcherBtn = document.getElementById('lang-switcher');
         const templates = { styleSelection: document.getElementById('style-selection-template'), recipeCard: document.getElementById('recipe-card-template'), error: document.getElementById('error-message-template'), };
 
+        // --- IMAGE DICTIONARY (PLAN C) ---
+        const imageMap = {
+            '蛋': 'https://images.pexels.com/photos/162712/egg-white-food-protein-162712.jpeg',
+            '鸡': 'https://images.pexels.com/photos/2673353/pexels-photo-2673353.jpeg',
+            '豬': 'https://images.pexels.com/photos/6107775/pexels-photo-6107775.jpeg',
+            '牛': 'https://images.pexels.com/photos/3535383/pexels-photo-3535383.jpeg',
+            '鱼': 'https://images.pexels.com/photos/2103949/pexels-photo-2103949.jpeg',
+            '虾': 'https://images.pexels.com/photos/2233992/pexels-photo-2233992.jpeg',
+            '番茄': 'https://images.pexels.com/photos/533280/pexels-photo-533280.jpeg',
+            '菜': 'https://images.pexels.com/photos/2893634/pexels-photo-2893634.jpeg',
+            '豆腐': 'https://images.pexels.com/photos/136745/pexels-photo-136745.jpeg',
+            '饭': 'https://images.pexels.com/photos/1309413/pexels-photo-1309413.jpeg',
+            '麵': 'https://images.pexels.com/photos/1279330/pexels-photo-1279330.jpeg',
+            '湯': 'https://images.pexels.com/photos/539451/pexels-photo-539451.jpeg',
+            'default': 'https://images.pexels.com/photos/376464/pexels-photo-376464.jpeg'
+        };
+
         // --- INITIALIZATION ---
         document.addEventListener('DOMContentLoaded', () => {
             setLanguage(currentLanguage);
@@ -137,11 +154,12 @@
                 const recipeData = await generateRecipe(style, ingredients);
                 if (!recipeData) throw new Error(translations[currentLanguage].error_recipe_gen);
                 
-                setLoading(true, translations[currentLanguage].generating_image);
-                const imageUrl = await findImageUrl(recipeData);
+                setLoading(false, ""); // Turn off loading before displaying
+                const imageUrl = getImageForRecipe(recipeData.recipeName); // No 'await' needed
                 
                 displayRecipe(recipeData, imageUrl);
-            } catch (error) {
+            } catch (error)
+ {
                 console.error("Error in generateFinalRecipe:", error);
                 displayError(error.message);
             } finally {
@@ -187,32 +205,16 @@
         async function getCookingStyles(ingredients) { const langInstruction = currentLanguage === 'en' ? 'English' : 'Chinese'; const prompt = `In JSON array format, list the 4 most popular classic dish names for '${ingredients}' in the Malaysia/Singapore region. Respond in ${langInstruction}. Example: ["Style A", "Style B"]`; const payload = { contents: [{ parts: [{ text: prompt }] }], generationConfig: { responseMimeType: "application/json" } }; const result = await makeApiCallWithRetry('gemini', payload); const text = result?.candidates?.[0]?.content?.parts?.[0]?.text; let styles = []; try { styles = JSON.parse(text); if (!Array.isArray(styles)) styles = []; } catch { styles = []; } styles.push(translations[currentLanguage].ai_creative_style); return styles; }
         async function generateRecipe(style, ingredients) { const langInstruction = currentLanguage === 'en' ? 'Respond in English.' : '請用中文回答。'; let prompt; const baseRule = `\n\n**Rules:**\n1. Steps must be logical for a home cook.\n2. Quantities must be reasonable.\nPlease respond STRICTLY in the following JSON format:\n- recipeName (string), description (string), calories (number), ingredients (array of {name, quantity}), instructions (array of strings).\n${langInstruction}`; if (style === translations[currentLanguage].ai_creative_style) { prompt = `You are an experienced home cook. Design a delicious, logical recipe based on these ingredients: ${ingredients}. Create a suitable name for it.` + baseRule; } else { prompt = `You are a professional chef. Provide a detailed, authentic recipe for '${style}'. Main ingredients are '${ingredients}'. The recipe name must be '${style}'.` + baseRule; } const payload = { contents: [{ parts: [{ text: prompt }] }], generationConfig: { responseMimeType: "application/json", responseSchema: { type: "OBJECT", properties: { recipeName: { type: "STRING" }, description: { type: "STRING" }, calories: { type: "NUMBER" }, ingredients: { type: "ARRAY", items: { type: "OBJECT", properties: { name: { type: "STRING" }, quantity: { type: "STRING" } }, required: ["name", "quantity"] } }, instructions: { type: "ARRAY", items: { type: "STRING" } } }, required: ["recipeName", "description", "calories", "ingredients", "instructions"] } } }; const result = await makeApiCallWithRetry('gemini', payload); const text = result?.candidates?.[0]?.content?.parts?.[0]?.text; if (text) { try { return JSON.parse(text); } catch(e) { console.error("Failed to parse recipe JSON:", text); throw new Error("AI returned invalid recipe format."); } } return null; }
         
-        // --- B计划最终实现 (增强版Prompt) ---
-        async function findImageUrl(recipeData) {
-            const { recipeName, description } = recipeData;
-            const prompt = `You are a meticulous, professional stock photo researcher. Your ONLY job is to find a single, direct URL for a high-quality, realistic, royalty-free photo of the following food dish. 
-            
-            RULES:
-            1. The photo MUST be of the food itself, not animals, people, or unrelated scenes.
-            2. The photo MUST look delicious and be professionally shot.
-            3. Prioritize public domain image sources like Pexels, Unsplash, or Pixabay.
-            4. If you cannot find a perfect, high-quality, public-domain image URL, then you MUST respond with the single word "fallback".
-            5. Do NOT make up a URL. Do not apologize. Do not add any explanatory text. Just respond with the URL or the word "fallback".
-
-            Dish Name (this may be in Chinese or English): "${recipeName}"
-            Description: "${description}"`;
-
-            const payload = { contents: [{ parts: [{ text: prompt }] }] };
-            const result = await makeApiCallWithRetry('gemini', payload);
-            let imageUrl = result?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
-
-            const urlRegex = /^(https?:\/\/)([^\s\/]+)(\S*)$/;
-            if (imageUrl && imageUrl.toLowerCase() !== 'fallback' && urlRegex.test(imageUrl)) {
-                 return imageUrl;
+        // --- 最终的图片方案: 图片字典 ---
+        function getImageForRecipe(recipeName) {
+            // 我们检查食谱名称包含哪个关键字，然后返回对应的图片
+            for (const keyword in imageMap) {
+                if (recipeName.includes(keyword)) {
+                    return imageMap[keyword];
+                }
             }
-            
-            console.warn("AI returned 'fallback' or an invalid URL. Using placeholder.");
-            return `https://placehold.co/600x400/CCCCCC/FFFFFF?text=Image+Not+Found`;
+            // 如果都找不到，就返回默认的精美食物图片
+            return imageMap['default'];
         }
 
     </script>
