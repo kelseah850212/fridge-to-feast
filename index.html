@@ -169,14 +169,11 @@
             try {
                 setLoading(true, translations[currentLanguage].generating_recipe);
                 
-                // 1. 先顯示一個空的卡片結構
                 const emptyCard = displayEmptyRecipeCard();
                 
-                // 2. 開始串流並填充內容
                 const recipeData = await streamAndParseRecipe(style, ingredients, preferences, emptyCard);
                 if (!recipeData) throw new Error(translations[currentLanguage].error_recipe_gen);
 
-                // 3. 食譜完成後，再生成圖片
                 setLoading(true, translations[currentLanguage].art_director);
                 const imageUrl = await generateImageWithArtDirector(recipeData, ingredients);
                 emptyCard.querySelector('#recipe-image').src = imageUrl;
@@ -238,22 +235,28 @@
         }
 
         function populateRecipeCard(cardElement, data) {
-            cardElement.querySelector('#recipe-name').textContent = data.recipeName || '';
-            cardElement.querySelector('#recipe-calories').textContent = data.calories || '';
-            const ingredientsList = cardElement.querySelector('#recipe-ingredients');
-            ingredientsList.innerHTML = '';
-            (data.ingredients || []).forEach(item => {
-                const li = document.createElement('li');
-                li.textContent = `${item.name} - ${item.quantity}`;
-                ingredientsList.appendChild(li);
-            });
-            const instructionsDiv = cardElement.querySelector('#recipe-instructions');
-            instructionsDiv.innerHTML = '';
-            (data.instructions || []).forEach((step, index) => {
-                const p = document.createElement('p');
-                p.innerHTML = `<strong class="text-green-600">${translations[currentLanguage].step_label} ${index + 1}:</strong> ${step}`;
-                instructionsDiv.appendChild(p);
-            });
+            if (data.recipeName) cardElement.querySelector('#recipe-name').textContent = data.recipeName;
+            if (data.calories) cardElement.querySelector('#recipe-calories').textContent = data.calories;
+            
+            if (data.ingredients) {
+                const ingredientsList = cardElement.querySelector('#recipe-ingredients');
+                ingredientsList.innerHTML = '';
+                data.ingredients.forEach(item => {
+                    const li = document.createElement('li');
+                    li.textContent = `${item.name} - ${item.quantity}`;
+                    ingredientsList.appendChild(li);
+                });
+            }
+
+            if (data.instructions) {
+                const instructionsDiv = cardElement.querySelector('#recipe-instructions');
+                instructionsDiv.innerHTML = '';
+                data.instructions.forEach((step, index) => {
+                    const p = document.createElement('p');
+                    p.innerHTML = `<strong class="text-green-600">${translations[currentLanguage].step_label} ${index + 1}:</strong> ${step}`;
+                    instructionsDiv.appendChild(p);
+                });
+            }
         }
 
         // --- API HELPERS (v2.1 Streaming) ---
@@ -280,8 +283,32 @@
             }
         }
         
-        async function determineInputType(userInput) { const prompt = `Analyze the following text...`; const payload = { contents: [{ parts: [{ text: prompt }] }] }; const result = await makeApiCallWithRetry('gemini', payload); /* ... */ }
-        async function getCookingStyles(ingredients, preferences) { /* ... same as before ... */ }
+        async function determineInputType(userInput) { 
+            const prompt = `Analyze the following text and determine if it's a 'list of ingredients' or a 'recipe name'. Text: "${userInput}". Respond with only "ingredients" or "recipe_name".`; 
+            const payload = { contents: [{ parts: [{ text: prompt }] }] }; 
+            const result = await makeApiCallWithRetry('gemini', payload); 
+            const text = result?.candidates?.[0]?.content?.parts?.[0]?.text?.trim().replace(/"/g, ''); 
+            if (text === 'ingredients' || text === 'recipe_name') return text; 
+            return userInput.includes(',') || userInput.split(' ').length > 2 ? 'ingredients' : 'recipe_name'; 
+        }
+        
+        async function getCookingStyles(ingredients, preferences) {
+            const langInstruction = currentLanguage === 'en' ? 'English' : 'Chinese';
+            const preferenceText = preferences.length > 0 ? ` considering these preferences: ${preferences.join(', ')}` : '';
+            const prompt = `In JSON array format, list the 4 most popular classic dish names for '${ingredients}' in the Malaysia/Singapore region${preferenceText}. Respond in ${langInstruction}. Example: ["Style A", "Style B"]`;
+            const payload = { contents: [{ parts: [{ text: prompt }] }], generationConfig: { responseMimeType: "application/json" } };
+            const result = await makeApiCallWithRetry('gemini', payload);
+            const text = result?.candidates?.[0]?.content?.parts?.[0]?.text;
+            let styles = [];
+            try {
+                styles = JSON.parse(text);
+                if (!Array.isArray(styles)) styles = [];
+            } catch {
+                styles = [];
+            }
+            styles.push(translations[currentLanguage].ai_creative_style);
+            return styles;
+        }
 
         function generateRecipePayload(style, ingredients, preferences) {
             const langInstruction = currentLanguage === 'en' ? 'Respond in English.' : '請用中文回答。';
@@ -308,7 +335,6 @@
 
             const reader = response.body.getReader();
             const decoder = new TextDecoder();
-            let buffer = '';
             let fullText = '';
 
             const nameEl = cardElement.querySelector('#recipe-name');
@@ -318,18 +344,17 @@
                 const { value, done } = await reader.read();
                 if (done) break;
                 
-                buffer += decoder.decode(value, { stream: true });
-                
-                // Google的串流有時會把JSON分塊，我們要把它們拼回來
-                // 為了簡化，我們只在收到完整的JSON物件後才更新
-                // 實際應用中可以做得更精細
-                fullText += decoder.decode(value, { stream: true }).replace(/^data: /, '').trim();
+                let chunk = decoder.decode(value, { stream: true });
+                // Google的串流有時會包含 "data: " 前綴，我們需要移除它
+                chunk = chunk.replace(/^data: /, '').trim();
+                fullText += chunk;
                 
                 try {
+                    // 嘗試解析累積的完整JSON
                     const parsedData = JSON.parse(fullText);
                     populateRecipeCard(cardElement, parsedData);
                 } catch (e) {
-                    // JSON不完整，繼續接收
+                    // JSON不完整，繼續接收，但我們可以嘗試解析部分內容來更新UI
                     let partialName = fullText.match(/"recipeName":\s*"([^"]*)/);
                     if (partialName && partialName[1]) {
                         nameEl.innerHTML = partialName[1] + '<span class="blinking-cursor">|</span>';
@@ -360,7 +385,7 @@
         }
 
         async function createVisualPrompt(recipeName, ingredients) {
-            const prompt = `Act as a professional food stylist...`;
+            const prompt = `Act as a professional food stylist. I will give you a dish name. Your task is to write a single, detailed paragraph in English for an AI image generator. This description should be a visually rich "prompt" that describes the dish's appearance, plating, texture, and common garnishes. Be specific about the cultural context (e.g., Japanese, Thai, Chinese).\n\nDish Name: "${recipeName}"\nMain Ingredients: "${ingredients}"\n\nProvide the detailed English visual description now.`;
             const payload = { contents: [{ parts: [{ text: prompt }] }] };
             const result = await makeApiCallWithRetry('gemini', payload);
             return result?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || null;
