@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fridge To Feast (Graduated!)</title>
+    <title>Fridge To Feast (Final Version)</title>
     <link rel="manifest" href="data:application/manifest+json;base64,ew0KICAibmFtZSI6ICJGcmlkZ2UgVG8gRmVhc3QiLA0KICAic2hvcnRfbmFtZSI6ICJGcmlkZ2VGZWFzdCIsDQogICJpY29ucyI6IFsNCiAgICB7DQogICAgICAic3JjIjogImh0dHBzOi8vcGxhY2Vob2xkLmNvLzE5MngxOTIvMDBBMDgwL0ZGRkZGRj90ZXh0PUYyRiIsDQogICAgICAidHlwZSI6ICJpbWFnZS9wbmciLA0KICAgICAgInNpemVzIjogIjE5MngxOTIiDQogICAgfSwNCiAgICB7DQogICAgICAic3JjIjogImh0dHBzOi8vcGxhY2Vob2xkLmNvLzUxMng1MTIvMDBBMDgwL0ZGRkZGRj90ZXh0PUYyRiIsDQogICAgICAidHlwZSI6ICJpbWFnZS9wbmciLA0KICAgICAgInNpemVzIjogIjUxMng1MTIiDQogICAgfQ0KICBdLA0KICAic3RhcnRfdXJsIjogIi4iLA0KICAiZGlzcGxheSI6ICJzdGFuZGFsb25lIiwNCiAgInRoZW1lX2NvbG9yIjogIiMxMEI5ODEiLA0KICAiYmFja2dyb3VuZF9jb2xvciI6ICIjRjlGQUZCIg0KfQ==">
     <meta name="theme-color" content="#10B981">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -87,7 +87,7 @@
         const langSwitcherBtn = document.getElementById('lang-switcher');
         const templates = { styleSelection: document.getElementById('style-selection-template'), recipeCard: document.getElementById('recipe-card-template'), error: document.getElementById('error-message-template'), };
 
-        // --- IMAGE DICTIONARY (Super Robust Version) ---
+        // --- IMAGE DICTIONARY (Smartest Version) ---
         const imageMap = {
             '肉骨茶': 'https://images.pexels.com/photos/13075369/pexels-photo-13075369.jpeg',
             '咖喱鱼头': 'https://images.pexels.com/photos/2474661/pexels-photo-2474661.jpeg',
@@ -202,17 +202,14 @@
         }
         
         // --- API HELPERS (SECURE PROXY VERSION) ---
-        async function makeApiCallWithRetry(targetApi, payload, maxRetries = 3) {
+        async function makeApiCallWithRetry(payload, maxRetries = 3) {
             let attempt = 0;
             while (attempt < maxRetries) {
                 try {
                     const response = await fetch('/api/generate', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            targetApi: targetApi,
-                            payload: payload
-                        })
+                        body: JSON.stringify({ payload: payload }) // Simplified body
                     });
 
                     if (!response.ok) {
@@ -229,9 +226,9 @@
             }
         }
         
-        async function determineInputType(userInput) { const prompt = `Analyze the following text and determine if it's a 'list of ingredients' or a 'recipe name'. Text: "${userInput}". Respond with only "ingredients" or "recipe_name".`; const payload = { contents: [{ parts: [{ text: prompt }] }] }; const result = await makeApiCallWithRetry('gemini', payload); const text = result?.candidates?.[0]?.content?.parts?.[0]?.text?.trim().replace(/"/g, ''); if (text === 'ingredients' || text === 'recipe_name') return text; return userInput.includes(',') || userInput.split(' ').length > 2 ? 'ingredients' : 'recipe_name'; }
-        async function getCookingStyles(ingredients) { const langInstruction = currentLanguage === 'en' ? 'English' : 'Chinese'; const prompt = `In JSON array format, list the 4 most popular classic dish names for '${ingredients}' in the Malaysia/Singapore region. Respond in ${langInstruction}. Example: ["Style A", "Style B"]`; const payload = { contents: [{ parts: [{ text: prompt }] }], generationConfig: { responseMimeType: "application/json" } }; const result = await makeApiCallWithRetry('gemini', payload); const text = result?.candidates?.[0]?.content?.parts?.[0]?.text; let styles = []; try { styles = JSON.parse(text); if (!Array.isArray(styles)) styles = []; } catch { styles = []; } styles.push(translations[currentLanguage].ai_creative_style); return styles; }
-        async function generateRecipe(style, ingredients) { const langInstruction = currentLanguage === 'en' ? 'Respond in English.' : '請用中文回答。'; let prompt; const baseRule = `\n\n**Rules:**\n1. Steps must be logical for a home cook.\n2. Quantities must be reasonable.\nPlease respond STRICTLY in the following JSON format:\n- recipeName (string), description (string), calories (number), ingredients (array of {name, quantity}), instructions (array of strings).\n${langInstruction}`; if (style === translations[currentLanguage].ai_creative_style) { prompt = `You are an experienced home cook. Design a delicious, logical recipe based on these ingredients: ${ingredients}. Create a suitable name for it.` + baseRule; } else { prompt = `You are a professional chef. Provide a detailed, authentic recipe for '${style}'. Main ingredients are '${ingredients}'. The recipe name must be '${style}'.` + baseRule; } const payload = { contents: [{ parts: [{ text: prompt }] }], generationConfig: { responseMimeType: "application/json", responseSchema: { type: "OBJECT", properties: { recipeName: { type: "STRING" }, description: { type: "STRING" }, calories: { type: "NUMBER" }, ingredients: { type: "ARRAY", items: { type: "OBJECT", properties: { name: { type: "STRING" }, quantity: { type: "STRING" } }, required: ["name", "quantity"] } }, instructions: { type: "ARRAY", items: { type: "STRING" } } }, required: ["recipeName", "description", "calories", "ingredients", "instructions"] } } }; const result = await makeApiCallWithRetry('gemini', payload); const text = result?.candidates?.[0]?.content?.parts?.[0]?.text; if (text) { try { return JSON.parse(text); } catch(e) { console.error("Failed to parse recipe JSON:", text); throw new Error("AI returned invalid recipe format."); } } return null; }
+        async function determineInputType(userInput) { const prompt = `Analyze the following text and determine if it's a 'list of ingredients' or a 'recipe name'. Text: "${userInput}". Respond with only "ingredients" or "recipe_name".`; const payload = { contents: [{ parts: [{ text: prompt }] }] }; const result = await makeApiCallWithRetry(payload); const text = result?.candidates?.[0]?.content?.parts?.[0]?.text?.trim().replace(/"/g, ''); if (text === 'ingredients' || text === 'recipe_name') return text; return userInput.includes(',') || userInput.split(' ').length > 2 ? 'ingredients' : 'recipe_name'; }
+        async function getCookingStyles(ingredients) { const langInstruction = currentLanguage === 'en' ? 'English' : 'Chinese'; const prompt = `In JSON array format, list the 4 most popular classic dish names for '${ingredients}' in the Malaysia/Singapore region. Respond in ${langInstruction}. Example: ["Style A", "Style B"]`; const payload = { contents: [{ parts: [{ text: prompt }] }], generationConfig: { responseMimeType: "application/json" } }; const result = await makeApiCallWithRetry(payload); const text = result?.candidates?.[0]?.content?.parts?.[0]?.text; let styles = []; try { styles = JSON.parse(text); if (!Array.isArray(styles)) styles = []; } catch { styles = []; } styles.push(translations[currentLanguage].ai_creative_style); return styles; }
+        async function generateRecipe(style, ingredients) { const langInstruction = currentLanguage === 'en' ? 'Respond in English.' : '請用中文回答。'; let prompt; const baseRule = `\n\n**Rules:**\n1. Steps must be logical for a home cook.\n2. Quantities must be reasonable.\nPlease respond STRICTLY in the following JSON format:\n- recipeName (string), description (string), calories (number), ingredients (array of {name, quantity}), instructions (array of strings).\n${langInstruction}`; if (style === translations[currentLanguage].ai_creative_style) { prompt = `You are an experienced home cook. Design a delicious, logical recipe based on these ingredients: ${ingredients}. Create a suitable name for it.` + baseRule; } else { prompt = `You are a professional chef. Provide a detailed, authentic recipe for '${style}'. Main ingredients are '${ingredients}'. The recipe name must be '${style}'.` + baseRule; } const payload = { contents: [{ parts: [{ text: prompt }] }], generationConfig: { responseMimeType: "application/json", responseSchema: { type: "OBJECT", properties: { recipeName: { type: "STRING" }, description: { type: "STRING" }, calories: { type: "NUMBER" }, ingredients: { type: "ARRAY", items: { type: "OBJECT", properties: { name: { type: "STRING" }, quantity: { type: "STRING" } }, required: ["name", "quantity"] } }, instructions: { type: "ARRAY", items: { type: "STRING" } } }, required: ["recipeName", "description", "calories", "ingredients", "instructions"] } } }; const result = await makeApiCallWithRetry(payload); const text = result?.candidates?.[0]?.content?.parts?.[0]?.text; if (text) { try { return JSON.parse(text); } catch(e) { console.error("Failed to parse recipe JSON:", text); throw new Error("AI returned invalid recipe format."); } } return null; }
         
         // --- 最终的图片方案: 更聪明的图片字典 ---
         function getImageForRecipe(recipeName) {
