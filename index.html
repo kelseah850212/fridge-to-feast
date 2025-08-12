@@ -234,11 +234,13 @@
             return resultContainer.querySelector('.bg-white');
         }
 
+        // v2.1 修正版: 增加容錯能力
         function populateRecipeCard(cardElement, data) {
             if (data.recipeName) cardElement.querySelector('#recipe-name').textContent = data.recipeName;
             if (data.calories) cardElement.querySelector('#recipe-calories').textContent = data.calories;
             
-            if (data.ingredients) {
+            // 關鍵修正: 檢查 ingredients 是否為 Array
+            if (data.ingredients && Array.isArray(data.ingredients)) {
                 const ingredientsList = cardElement.querySelector('#recipe-ingredients');
                 ingredientsList.innerHTML = '';
                 data.ingredients.forEach(item => {
@@ -248,7 +250,8 @@
                 });
             }
 
-            if (data.instructions) {
+            // 關鍵修正: 檢查 instructions 是否為 Array
+            if (data.instructions && Array.isArray(data.instructions)) {
                 const instructionsDiv = cardElement.querySelector('#recipe-instructions');
                 instructionsDiv.innerHTML = '';
                 data.instructions.forEach((step, index) => {
@@ -345,16 +348,17 @@
                 if (done) break;
                 
                 let chunk = decoder.decode(value, { stream: true });
-                // Google的串流有時會包含 "data: " 前綴，我們需要移除它
+                // Google的串流有時會包含 "data: " 前綴和方括號，我們需要處理它
                 chunk = chunk.replace(/^data: /, '').trim();
+                if (chunk.startsWith('[') && chunk.endsWith(']')) {
+                    chunk = chunk.slice(1, -1);
+                }
                 fullText += chunk;
                 
                 try {
-                    // 嘗試解析累積的完整JSON
                     const parsedData = JSON.parse(fullText);
                     populateRecipeCard(cardElement, parsedData);
                 } catch (e) {
-                    // JSON不完整，繼續接收，但我們可以嘗試解析部分內容來更新UI
                     let partialName = fullText.match(/"recipeName":\s*"([^"]*)/);
                     if (partialName && partialName[1]) {
                         nameEl.innerHTML = partialName[1] + '<span class="blinking-cursor">|</span>';
