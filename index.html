@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fridge To Feast (Polished)</title>
-    <link rel="manifest" href="data:application/manifest+json;base64,ew0KICAibmFtZSI6ICJGcmlkZ2UgVG8gRmVhc3QiLA0KICAic2hvcnRfbmFtZSI6ICJGcmlkZ2VGZWFzdCIsDQogICJpY29ucyI6IFsNCiAgICB7DQogICAgICAic3JjIjogImh0dHBzOi8vcGxhY-ob2xkLmNvLzE5MngxOTIvMDBBMDgwL0ZGRkZGRj90ZXh0PUYyRiIsDQogICAgICAidHlwZSI6ICJpbWFnZS9wbmciLA0KICAgICAgInNpemVzIjogIjE5MngxOTIiDQogICAgfSwNCiAgICB7DQogICAgICAic3JjIjogImh0dHBzOi8vcGxhY-ob2xkLmNvLzUxMng1MTIvMDBBMDgwL0ZGRkZGRj90ZXh0PUYyRiIsDQogICAgICAidHlwZSI6ICJpbWFnZS9wbmciLA0KICAgICAgInNpemVzIjogIjUxMng1MTIiDQogICAgfQ0KICBdLA0KICAic3RhcnRfdXJsIjogIi4iLA0KICAiZGlzcGxheSI6ICJzdGFuZGFsb25lIiwNCiAgInRoZW1lX2NvbG9yIjogIiMxMEI5ODEiLA0KICAiYmFja2dyb3VuZF9jb2xvciI6ICIjRjlGQUZCIg0KfQ==">
+    <title>Fridge To Feast (Plan A)</title>
+    <link rel="manifest" href="data:application/manifest+json;base64,ew0KICAibmFtZSI6ICJGcmlkZ2UgVG8gRmVhc3QiLA0KICAic2hvcnRfbmFtZSI6ICJGcmlkZ2VGZWFzdCIsDQogICJpY29ucyI6IFsNCiAgICB7DQogICAgICAic3JjIjogImh0dHBzOi8vcGxhY2Vob2xkLmNvLzE5MngxOTIvMDBBMDgwL0ZGRkZGRj90ZXh0PUYyRiIsDQogICAgICAidHlwZSI6ICJpbWFnZS9wbmciLA0KICAgICAgInNpemVzIjogIjE5MngxOTIiDQogICAgfSwNCiAgICB7DQogICAgICAic3JjIjogImh0dHBzOi8vcGxhY2Vob2xkLmNvLzUxMng1MTIvMDBBMDgwL0ZGRkZGRj90ZXh0PUYyRiIsDQogICAgICAidHlwZSI6ICJpbWFnZS9wbmciLA0KICAgICAgInNpemVzIjogIjUxMng1MTIiDQogICAgfQ0KICBdLA0KICAic3RhcnRfdXJsIjogIi4iLA0KICAiZGlzcGxheSI6ICJzdGFuZGFsb25lIiwNCiAgInRoZW1lX2NvbG9yIjogIiMxMEI5ODEiLA0KICAiYmFja2dyb3VuZF9jb2xvciI6ICIjRjlGQUZCIg0KfQ==">
     <meta name="theme-color" content="#10B981">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -74,8 +74,8 @@
 
         // --- I18N ---
         const translations = {
-            zh: { lang_switcher: "English", main_title: "Fridge To Feast", subtitle: "輸入食材找靈感，或直接搜尋菜名！", input_placeholder: "例如: 雞蛋, 番茄", start_button: "開始", thinking: "思考中...", generating_recipe: "生成食譜中...", generating_image: "寻找灵感图片中...", art_director: "聘請造型師...", how_to_cook: "你想怎麼煮？", ai_creative_style: "AI創意煮法", image_ref_note: "图片只供参考", calories_label: "預估卡路里", calories_note: "(估算值)", ingredients_label: "所需食材", instructions_label: "做法", error_title: "噢不，出錯了！", error_input_required: "請輸入食材或菜名！", error_generic: "無法處理您的請求，請稍後再試。", error_recipe_gen: "生成食譜失敗，請稍後再試。", step_label: "步驟" },
-            en: { lang_switcher: "中文", main_title: "Fridge To Feast", subtitle: "Enter ingredients for ideas, or search for a recipe directly!", input_placeholder: "e.g., egg, tomato", start_button: "Start", thinking: "Thinking...", generating_recipe: "Generating Recipe...", generating_image: "Finding inspiration image...", art_director: "Hiring Art Director...", how_to_cook: "How would you like to cook it?", ai_creative_style: "AI Creative Style", image_ref_note: "Image for reference only", calories_label: "Est. Calories", calories_note: "(approx.)", ingredients_label: "Ingredients", instructions_label: "Instructions", error_title: "Oh no, an error occurred!", error_input_required: "Please enter ingredients or a recipe name!", error_generic: "Could not process your request. Please try again later.", error_recipe_gen: "Failed to generate recipe. Please try again later.", step_label: "Step" }
+            zh: { lang_switcher: "English", main_title: "Fridge To Feast", subtitle: "輸入食材找靈感，或直接搜尋菜名！", input_placeholder: "例如: 雞蛋, 番茄", start_button: "開始", thinking: "思考中...", generating_recipe: "生成食譜中...", generating_image: "繪製圖片中...", art_director: "聘請造型師...", how_to_cook: "你想怎麼煮？", ai_creative_style: "AI創意煮法", image_ref_note: "图片只供参考", calories_label: "預估卡路里", calories_note: "(估算值)", ingredients_label: "所需食材", instructions_label: "做法", error_title: "噢不，出錯了！", error_input_required: "請輸入食材或菜名！", error_generic: "無法處理您的請求，請稍後再試。", error_recipe_gen: "生成食譜失敗，請稍後再試。", step_label: "步驟" },
+            en: { lang_switcher: "中文", main_title: "Fridge To Feast", subtitle: "Enter ingredients for ideas, or search for a recipe directly!", input_placeholder: "e.g., egg, tomato", start_button: "Start", thinking: "Thinking...", generating_recipe: "Generating Recipe...", generating_image: "Creating Image...", art_director: "Hiring Art Director...", how_to_cook: "How would you like to cook it?", ai_creative_style: "AI Creative Style", image_ref_note: "Image for reference only", calories_label: "Est. Calories", calories_note: "(approx.)", ingredients_label: "Ingredients", instructions_label: "Instructions", error_title: "Oh no, an error occurred!", error_input_required: "Please enter ingredients or a recipe name!", error_generic: "Could not process your request. Please try again later.", error_recipe_gen: "Failed to generate recipe. Please try again later.", step_label: "Step" }
         };
         let currentLanguage = localStorage.getItem('fridgeToFeastLang') || 'zh';
 
@@ -137,8 +137,8 @@
                 const recipeData = await generateRecipe(style, ingredients);
                 if (!recipeData) throw new Error(translations[currentLanguage].error_recipe_gen);
                 
-                setLoading(true, translations[currentLanguage].generating_image);
-                const imageUrl = await findImageUrl(recipeData);
+                setLoading(true, translations[currentLanguage].art_director);
+                const imageUrl = await generateImageWithArtDirector(recipeData, ingredients);
                 
                 displayRecipe(recipeData, imageUrl);
             } catch (error) {
@@ -187,32 +187,36 @@
         async function getCookingStyles(ingredients) { const langInstruction = currentLanguage === 'en' ? 'English' : 'Chinese'; const prompt = `In JSON array format, list the 4 most popular classic dish names for '${ingredients}' in the Malaysia/Singapore region. Respond in ${langInstruction}. Example: ["Style A", "Style B"]`; const payload = { contents: [{ parts: [{ text: prompt }] }], generationConfig: { responseMimeType: "application/json" } }; const result = await makeApiCallWithRetry('gemini', payload); const text = result?.candidates?.[0]?.content?.parts?.[0]?.text; let styles = []; try { styles = JSON.parse(text); if (!Array.isArray(styles)) styles = []; } catch { styles = []; } styles.push(translations[currentLanguage].ai_creative_style); return styles; }
         async function generateRecipe(style, ingredients) { const langInstruction = currentLanguage === 'en' ? 'Respond in English.' : '請用中文回答。'; let prompt; const baseRule = `\n\n**Rules:**\n1. Steps must be logical for a home cook.\n2. Quantities must be reasonable.\nPlease respond STRICTLY in the following JSON format:\n- recipeName (string), description (string), calories (number), ingredients (array of {name, quantity}), instructions (array of strings).\n${langInstruction}`; if (style === translations[currentLanguage].ai_creative_style) { prompt = `You are an experienced home cook. Design a delicious, logical recipe based on these ingredients: ${ingredients}. Create a suitable name for it.` + baseRule; } else { prompt = `You are a professional chef. Provide a detailed, authentic recipe for '${style}'. Main ingredients are '${ingredients}'. The recipe name must be '${style}'.` + baseRule; } const payload = { contents: [{ parts: [{ text: prompt }] }], generationConfig: { responseMimeType: "application/json", responseSchema: { type: "OBJECT", properties: { recipeName: { type: "STRING" }, description: { type: "STRING" }, calories: { type: "NUMBER" }, ingredients: { type: "ARRAY", items: { type: "OBJECT", properties: { name: { type: "STRING" }, quantity: { type: "STRING" } }, required: ["name", "quantity"] } }, instructions: { type: "ARRAY", items: { type: "STRING" } } }, required: ["recipeName", "description", "calories", "ingredients", "instructions"] } } }; const result = await makeApiCallWithRetry('gemini', payload); const text = result?.candidates?.[0]?.content?.parts?.[0]?.text; if (text) { try { return JSON.parse(text); } catch(e) { console.error("Failed to parse recipe JSON:", text); throw new Error("AI returned invalid recipe format."); } } return null; }
         
-        // --- 最终的图片寻找函数 (经过优化的Prompt) ---
-        async function findImageUrl(recipeData) {
-            const { recipeName, description } = recipeData;
-            const prompt = `You are a meticulous, professional stock photo researcher. Your ONLY job is to find a single, direct URL for a high-quality, realistic, royalty-free photo of the following food dish. 
-            
-            RULES:
-            1. The photo MUST be of the food itself, not animals, people, or unrelated scenes.
-            2. The photo MUST look delicious and be professionally shot.
-            3. Prioritize public domain image sources like Pexels, Unsplash, or Pixabay.
-            4. If you cannot find a perfect, high-quality, public-domain image URL, then you MUST respond with the single word "fallback".
-            5. Do NOT make up a URL. Do not apologize. Do not add any explanatory text. Just respond with the URL or the word "fallback".
+        // --- Plan A - Image Generation Functions ---
+        async function generateImageWithArtDirector(recipeData, originalIngredients) {
+            const artDirectorPrompt = await createVisualPrompt(recipeData.recipeName, originalIngredients);
+            if (!artDirectorPrompt) {
+                console.warn("Art Director failed. Falling back to basic image generation.");
+                const fallbackPrompt = `Professional food photography of a dish named '${recipeData.recipeName}' with main ingredients '${originalIngredients}'.`;
+                return await generateImage(fallbackPrompt);
+            }
+            setLoading(true, translations[currentLanguage].generating_image);
+            return await generateImage(artDirectorPrompt);
+        }
 
-            Dish Name (this may be in Chinese or English): "${recipeName}"
-            Description: "${description}"`;
-
+        async function createVisualPrompt(recipeName, ingredients) {
+            const prompt = `Act as a professional food stylist. I will give you a dish name. Your task is to write a single, detailed paragraph in English for an AI image generator. This description should be a visually rich "prompt" that describes the dish's appearance, plating, texture, and common garnishes. Be specific about the cultural context (e.g., Japanese, Thai, Chinese).\n\nDish Name: "${recipeName}"\nMain Ingredients: "${ingredients}"\n\nProvide the detailed English visual description now.`;
             const payload = { contents: [{ parts: [{ text: prompt }] }] };
             const result = await makeApiCallWithRetry('gemini', payload);
-            let imageUrl = result?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+            return result?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || null;
+        }
+        
+        async function generateImage(prompt) {
+            // Using the modern 'contents' format which is more consistent with Gemini.
+            const payload = { contents: [{ parts: [{ text: prompt }] }] };
+            const result = await makeApiCallWithRetry('imagen', payload);
 
-            const urlRegex = /^(https?:\/\/)([^\s\/]+)(\S*)$/;
-            if (imageUrl && imageUrl.toLowerCase() !== 'fallback' && urlRegex.test(imageUrl)) {
-                 return imageUrl;
+            // The response for the new models is also in the 'candidates' block
+            const base64Data = result?.candidates?.[0]?.content?.parts?.[0]?.fileData?.data;
+            if (base64Data) {
+                return `data:image/png;base64,${base64Data}`;
             }
-            
-            console.warn("AI returned 'fallback' or an invalid URL. Using placeholder.");
-            return `https://placehold.co/600x400/CCCCCC/FFFFFF?text=Image+Not+Found`;
+            return `https://placehold.co/600x400/CCCCCC/FFFFFF?text=Image+Generation+Failed`;
         }
 
     </script>
