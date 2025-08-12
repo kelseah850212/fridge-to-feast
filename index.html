@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fridge To Feast (簡化版)</title>
+    <title>Fridge To Feast (Stable 1.0)</title>
     <link rel="manifest" href="data:application/manifest+json;base64,ew0KICAibmFtZSI6ICJGcmlkZ2UgVG8gRmVhc3QiLA0KICAic2hvcnRfbmFtZSI6ICJGcmlkZ2VGZWFzdCIsDQogICJpY29ucyI6IFsNCiAgICB7DQogICAgICAic3JjIjogImh0dHBzOi8vcGxhY2Vob2xkLmNvLzE5MngxOTIvMDBBMDgwL0ZGRkZGRj90ZXh0PUYyRiIsDQogICAgICAidHlwZSI6ICJpbWFnZS9wbmciLA0KICAgICAgInNpemVzIjogIjE5MngxOTIiDQogICAgfSwNCiAgICB7DQogICAgICAic3JjIjogImh0dHBzOi8vcGxhY2Vob2xkLmNvLzUxMng1MTIvMDBBMDgwL0ZGRkZGRj90ZXh0PUYyRiIsDQogICAgICAidHlwZSI6ICJpbWFnZS9wbmciLA0KICAgICAgInNpemVzIjogIjUxMng1MTIiDQogICAgfQ0KICBdLA0KICAic3RhcnRfdXJsIjogIi4iLA0KICAiZGlzcGxheSI6ICJzdGFuZGFsb25lIiwNCiAgInRoZW1lX2NvbG9yIjogIiMxMEI5ODEiLA0KICAiYmFja2dyb3VuZF9jb2xvciI6ICIjRjlGQUZCIg0KfQ==">
     <meta name="theme-color" content="#10B981">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -263,7 +263,8 @@
                 prompt = `You are a professional chef. Provide a detailed, authentic recipe for '${style}'. Main ingredients are '${ingredients}'. The recipe name must be '${style}'.` + baseRule;
             }
             const payload = { contents: [{ parts: [{ text: prompt }] }], generationConfig: { responseMimeType: "application/json" } };
-            return await makeApiCallWithRetry('gemini', payload);
+            const result = await makeApiCallWithRetry('gemini', payload);
+            return result; // 直接返回完整的JSON物件
         }
 
         async function generateImageWithArtDirector(recipeData, originalIngredients) {

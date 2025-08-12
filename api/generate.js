@@ -1,4 +1,4 @@
-// File: /api/generate.js (v2.2 - Final Corrected Version)
+// File: /api/generate.js (Reverted to Stable 1.0)
 
 // 使用最穩定、兼容性最好的 CommonJS 語法
 module.exports = async (request, response) => {
@@ -23,10 +23,9 @@ module.exports = async (request, response) => {
       return response.status(500).json({ message: 'API key is not configured on the server.' });
     }
 
-    // 我們的通訊錄
+    // 我們的通訊錄，現在同時有文字AI和圖片AI的地址
     const API_URLS = {
-      // 對於文字，我們在後端使用串流來加速，但會組合好再回傳
-      gemini: `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:streamGenerateContent?key=${API_KEY}`,
+      gemini: `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${API_KEY}`,
       imagen: `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${API_KEY}`
     };
 
@@ -50,62 +49,13 @@ module.exports = async (request, response) => {
       return response.status(apiResponse.status).json({ message: 'Google API Error', details: errorText });
     }
 
-    // 如果是圖片請求，直接回傳結果
-    if (targetApi === 'imagen') {
-      const data = await apiResponse.json();
-      return response.status(200).json(data);
-    }
-
-    // 如果是文字請求，由後端負責組合串流
-    const reader = apiResponse.body.getReader();
-    const decoder = new TextDecoder();
-    let fullText = '';
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      fullText += decoder.decode(value, { stream: true });
-    }
-
-    // 清理並組合串流數據塊
-    const jsonChunks = fullText.trim().split('data: ').filter(Boolean);
-    let combinedText = '';
-    jsonChunks.forEach(chunk => {
-        try {
-            const parsed = JSON.parse(chunk);
-            if (parsed.candidates && parsed.candidates[0].content.parts[0].text) {
-                combinedText += parsed.candidates[0].content.parts[0].text;
-            }
-        } catch (e) {
-            // 忽略無法解析的數據塊
-        }
-    });
-
-    // --- 關鍵修正 ---
-    // 檢查原始請求是否要求JSON格式
-    if (payload.generationConfig && payload.generationConfig.responseMimeType === "application/json") {
-        try {
-            // 如果是，就把它當作JSON來解析
-            const finalJson = JSON.parse(combinedText);
-            return response.status(200).json(finalJson);
-        } catch(e) {
-            console.error("Failed to parse combined JSON text from stream:", combinedText);
-            return response.status(500).json({ message: 'Failed to parse AI response stream as JSON.' });
-        }
-    } else {
-        // 如果只是普通文字，就把它包裝成前端期望的格式回傳
-        const textResponse = {
-            candidates: [{
-                content: {
-                    parts: [{
-                        text: combinedText
-                    }]
-                }
-            }]
-        };
-        return response.status(200).json(textResponse);
-    }
+    const data = await apiResponse.json();
+    
+    // 任務成功！把從 Google 獲得的結果一次性傳回給前端
+    return response.status(200).json(data);
 
   } catch (error) {
+    // 捕捉所有未預料的錯誤
     console.error("Fatal Error in API Proxy:", error);
     if (!response.headersSent) {
         response.status(500).json({ message: 'An unexpected error occurred within the API proxy.', details: error.message });
