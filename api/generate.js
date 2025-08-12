@@ -1,4 +1,4 @@
-// File: /api/generate.js (Reverted to Stable 1.0)
+// File: /api/generate.js (The Final Plan A Version)
 
 // 使用最穩定、兼容性最好的 CommonJS 語法
 module.exports = async (request, response) => {
@@ -26,6 +26,7 @@ module.exports = async (request, response) => {
     // 我們的通訊錄，現在同時有文字AI和圖片AI的地址
     const API_URLS = {
       gemini: `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${API_KEY}`,
+      // 圖片AI的正確地址
       imagen: `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${API_KEY}`
     };
 
@@ -51,16 +52,12 @@ module.exports = async (request, response) => {
 
     const data = await apiResponse.json();
     
-    // 任務成功！把從 Google 獲得的結果一次性傳回給前端
+    // 任務成功！把從 Google 獲得的結果傳回給前端
     return response.status(200).json(data);
 
   } catch (error) {
     // 捕捉所有未預料的錯誤
     console.error("Fatal Error in API Proxy:", error);
-    if (!response.headersSent) {
-        response.status(500).json({ message: 'An unexpected error occurred within the API proxy.', details: error.message });
-    } else {
-        response.end();
-    }
+    return response.status(500).json({ message: 'An unexpected error occurred within the API proxy.', details: error.message });
   }
 };
