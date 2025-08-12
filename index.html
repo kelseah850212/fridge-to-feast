@@ -87,26 +87,38 @@
         const langSwitcherBtn = document.getElementById('lang-switcher');
         const templates = { styleSelection: document.getElementById('style-selection-template'), recipeCard: document.getElementById('recipe-card-template'), error: document.getElementById('error-message-template'), };
 
-        // --- IMAGE DICTIONARY (Smart Version) ---
-        const imageMap = [
-            { keywords: ['肉骨茶'], url: 'https://images.pexels.com/photos/13075369/pexels-photo-13075369.jpeg' },
-            { keywords: ['咖喱鱼头', '咖哩魚頭'], url: 'https://images.pexels.com/photos/2474661/pexels-photo-2474661.jpeg' },
-            { keywords: ['蛋'], url: 'https://images.pexels.com/photos/162712/egg-white-food-protein-162712.jpeg' },
-            { keywords: ['鸡', '雞'], url: 'https://images.pexels.com/photos/2673353/pexels-photo-2673353.jpeg' },
-            { keywords: ['猪', '豬'], url: 'https://images.pexels.com/photos/6107775/pexels-photo-6107775.jpeg' },
-            { keywords: ['牛'], url: 'https://images.pexels.com/photos/3535383/pexels-photo-3535383.jpeg' },
-            { keywords: ['鱼', '魚'], url: 'https://images.pexels.com/photos/2103949/pexels-photo-2103949.jpeg' },
-            { keywords: ['虾', '蝦'], url: 'https://images.pexels.com/photos/2233992/pexels-photo-2233992.jpeg' },
-            { keywords: ['番茄'], url: 'https://images.pexels.com/photos/533280/pexels-photo-533280.jpeg' },
-            { keywords: ['菜'], url: 'https://images.pexels.com/photos/2893634/pexels-photo-2893634.jpeg' },
-            { keywords: ['豆腐'], url: 'https://images.pexels.com/photos/136745/pexels-photo-136745.jpeg' },
-            { keywords: ['饭', '飯'], url: 'https://images.pexels.com/photos/1309413/pexels-photo-1309413.jpeg' },
-            { keywords: ['面', '麵'], url: 'https://images.pexels.com/photos/1279330/pexels-photo-1279330.jpeg' },
-            { keywords: ['汤', '湯', '粥'], url: 'https://images.pexels.com/photos/539451/pexels-photo-539451.jpeg' },
-            { keywords: ['咖喱', '咖哩'], url: 'https://images.pexels.com/photos/1633578/pexels-photo-1633578.jpeg' },
-            { keywords: ['肉'], url: 'https://images.pexels.com/photos/769289/pexels-photo-769289.jpeg' },
-            { keywords: ['default'], url: 'https://images.pexels.com/photos/376464/pexels-photo-376464.jpeg' }
-        ];
+        // --- IMAGE DICTIONARY (Super Robust Version) ---
+        const imageMap = {
+            '肉骨茶': 'https://images.pexels.com/photos/13075369/pexels-photo-13075369.jpeg',
+            '咖喱鱼头': 'https://images.pexels.com/photos/2474661/pexels-photo-2474661.jpeg',
+            '咖哩魚頭': 'https://images.pexels.com/photos/2474661/pexels-photo-2474661.jpeg',
+            '鸡': 'https://images.pexels.com/photos/2673353/pexels-photo-2673353.jpeg',
+            '雞': 'https://images.pexels.com/photos/2673353/pexels-photo-2673353.jpeg',
+            '猪': 'https://images.pexels.com/photos/6107775/pexels-photo-6107775.jpeg',
+            '豬': 'https://images.pexels.com/photos/6107775/pexels-photo-6107775.jpeg',
+            '牛': 'https://images.pexels.com/photos/3535383/pexels-photo-3535383.jpeg',
+            '鱼': 'https://images.pexels.com/photos/2103949/pexels-photo-2103949.jpeg',
+            '魚': 'https://images.pexels.com/photos/2103949/pexels-photo-2103949.jpeg',
+            '虾': 'https://images.pexels.com/photos/2233992/pexels-photo-2233992.jpeg',
+            '蝦': 'https://images.pexels.com/photos/2233992/pexels-photo-2233992.jpeg',
+            '番茄': 'https://images.pexels.com/photos/533280/pexels-photo-533280.jpeg',
+            '豆腐': 'https://images.pexels.com/photos/136745/pexels-photo-136745.jpeg',
+            '饭': 'https://images.pexels.com/photos/1309413/pexels-photo-1309413.jpeg',
+            '飯': 'https://images.pexels.com/photos/1309413/pexels-photo-1309413.jpeg',
+            '面': 'https://images.pexels.com/photos/1279330/pexels-photo-1279330.jpeg',
+            '麵': 'https://images.pexels.com/photos/1279330/pexels-photo-1279330.jpeg',
+            '汤': 'https://images.pexels.com/photos/539451/pexels-photo-539451.jpeg',
+            '湯': 'https://images.pexels.com/photos/539451/pexels-photo-539451.jpeg',
+            '粥': 'https://images.pexels.com/photos/3026283/pexels-photo-3026283.jpeg',
+            '咖喱': 'https://images.pexels.com/photos/1633578/pexels-photo-1633578.jpeg',
+            '咖哩': 'https://images.pexels.com/photos/1633578/pexels-photo-1633578.jpeg',
+            '肉': 'https://images.pexels.com/photos/769289/pexels-photo-769289.jpeg',
+            '菜': 'https://images.pexels.com/photos/2893634/pexels-photo-2893634.jpeg',
+            'default': 'https://images.pexels.com/photos/376464/pexels-photo-376464.jpeg'
+        };
+
+        // Create a sorted list of keywords, from longest to shortest, ONCE.
+        const sortedKeywords = Object.keys(imageMap).sort((a, b) => b.length - a.length);
 
         // --- INITIALIZATION ---
         document.addEventListener('DOMContentLoaded', () => {
@@ -223,17 +235,15 @@
         
         // --- 最终的图片方案: 更聪明的图片字典 ---
         function getImageForRecipe(recipeName) {
-            // 我们现在遍历这个列表，而不是一个简单的对象
-            for (const entry of imageMap) {
-                // 检查entry里的每一个关键字
-                for (const keyword of entry.keywords) {
-                    if (recipeName.includes(keyword)) {
-                        return entry.url; // 找到就立刻返回
-                    }
+            // Iterate through our sorted keywords to find the most specific match first.
+            for (const keyword of sortedKeywords) {
+                if (keyword === 'default') continue;
+                if (recipeName.includes(keyword)) {
+                    return imageMap[keyword]; // Found the best match
                 }
             }
-            // 如果都找不到，就返回默认的精美食物图片
-            return imageMap.find(entry => entry.keywords.includes('default')).url;
+            // If no specific match is found, return the default image.
+            return imageMap['default'];
         }
 
     </script>
