@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fridge To Feast (Final Version)</title>
+    <title>Fridge To Feast (Detective Mode)</title>
     <link rel="manifest" href="data:application/manifest+json;base64,ew0KICAibmFtZSI6ICJGcmlkZ2UgVG8gRmVhc3QiLA0KICAic2hvcnRfbmFtZSI6ICJGcmlkZ2VGZWFzdCIsDQogICJpY29ucyI6IFsNCiAgICB7DQogICAgICAic3JjIjogImh0dHBzOi8vcGxhY2Vob2xkLmNvLzE5MngxOTIvMDBBMDgwL0ZGRkZGRj90ZXh0PUYyRiIsDQogICAgICAidHlwZSI6ICJpbWFnZS9wbmciLA0KICAgICAgInNpemVzIjogIjE5MngxOTIiDQogICAgfSwNCiAgICB7DQogICAgICAic3JjIjogImh0dHBzOi8vcGxhY2Vob2xkLmNvLzUxMng1MTIvMDBBMDgwL0ZGRkZGRj90ZXh0PUYyRiIsDQogICAgICAidHlwZSI6ICJpbWFnZS9wbmciLA0KICAgICAgInNpemVzIjogIjUxMng1MTIiDQogICAgfQ0KICBdLA0KICAic3RhcnRfdXJsIjogIi4iLA0KICAiZGlzcGxheSI6ICJzdGFuZGFsb25lIiwNCiAgInRoZW1lX2NvbG9yIjogIiMxMEI5ODEiLA0KICAiYmFja2dyb3VuZF9jb2xvciI6ICIjRjlGQUZCIg0KfQ==">
     <meta name="theme-color" content="#10B981">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -86,20 +86,31 @@
         const langSwitcherBtn = document.getElementById('lang-switcher');
         const templates = { styleSelection: document.getElementById('style-selection-template'), recipeCard: document.getElementById('recipe-card-template'), error: document.getElementById('error-message-template'), };
 
-        // --- IMAGE DICTIONARY (PLAN C) ---
+        // --- IMAGE DICTIONARY (Expanded) ---
         const imageMap = {
             '蛋': 'https://images.pexels.com/photos/162712/egg-white-food-protein-162712.jpeg',
             '鸡': 'https://images.pexels.com/photos/2673353/pexels-photo-2673353.jpeg',
+            '雞': 'https://images.pexels.com/photos/2673353/pexels-photo-2673353.jpeg',
+            '猪': 'https://images.pexels.com/photos/6107775/pexels-photo-6107775.jpeg',
             '豬': 'https://images.pexels.com/photos/6107775/pexels-photo-6107775.jpeg',
             '牛': 'https://images.pexels.com/photos/3535383/pexels-photo-3535383.jpeg',
             '鱼': 'https://images.pexels.com/photos/2103949/pexels-photo-2103949.jpeg',
+            '魚': 'https://images.pexels.com/photos/2103949/pexels-photo-2103949.jpeg',
             '虾': 'https://images.pexels.com/photos/2233992/pexels-photo-2233992.jpeg',
+            '蝦': 'https://images.pexels.com/photos/2233992/pexels-photo-2233992.jpeg',
             '番茄': 'https://images.pexels.com/photos/533280/pexels-photo-533280.jpeg',
             '菜': 'https://images.pexels.com/photos/2893634/pexels-photo-2893634.jpeg',
             '豆腐': 'https://images.pexels.com/photos/136745/pexels-photo-136745.jpeg',
             '饭': 'https://images.pexels.com/photos/1309413/pexels-photo-1309413.jpeg',
+            '飯': 'https://images.pexels.com/photos/1309413/pexels-photo-1309413.jpeg',
+            '面': 'https://images.pexels.com/photos/1279330/pexels-photo-1279330.jpeg',
             '麵': 'https://images.pexels.com/photos/1279330/pexels-photo-1279330.jpeg',
             '汤': 'https://images.pexels.com/photos/539451/pexels-photo-539451.jpeg',
+            '湯': 'https://images.pexels.com/photos/539451/pexels-photo-539451.jpeg',
+            '咖喱': 'https://images.pexels.com/photos/1633578/pexels-photo-1633578.jpeg',
+            '咖哩': 'https://images.pexels.com/photos/1633578/pexels-photo-1633578.jpeg',
+            '肉': 'https://images.pexels.com/photos/769289/pexels-photo-769289.jpeg', // 新增“肉”
+            '粥': 'https://images.pexels.com/photos/3026283/pexels-photo-3026283.jpeg', // 新增“粥”
             'default': 'https://images.pexels.com/photos/376464/pexels-photo-376464.jpeg'
         };
 
@@ -154,8 +165,8 @@
                 const recipeData = await generateRecipe(style, ingredients);
                 if (!recipeData) throw new Error(translations[currentLanguage].error_recipe_gen);
                 
-                setLoading(false, ""); // Turn off loading before displaying
-                const imageUrl = getImageForRecipe(recipeData.recipeName); // No 'await' needed
+                setLoading(false, ""); 
+                const imageUrl = getImageForRecipe(recipeData.recipeName);
                 
                 displayRecipe(recipeData, imageUrl);
             } catch (error) {
@@ -170,7 +181,24 @@
         function setLoading(isLoading, message) { startBtn.disabled = isLoading; startBtn.querySelector('span').textContent = isLoading ? message : translations[currentLanguage].start_button; if (isLoading && message === translations[currentLanguage].thinking) { resultContainer.innerHTML = ''; } }
         function displayError(message) { resultContainer.innerHTML = ''; const errorCard = templates.error.content.cloneNode(true); const titleEl = errorCard.querySelector('[data-translate="error_title"]'); if (titleEl) titleEl.textContent = translations[currentLanguage].error_title; errorCard.getElementById('error-text').textContent = message; resultContainer.appendChild(errorCard); }
         function displayCookingStyles(styles, ingredients) { resultContainer.innerHTML = ''; const styleCard = templates.styleSelection.content.cloneNode(true); const container = styleCard.getElementById('style-buttons-container'); styleCard.querySelector('[data-translate="how_to_cook"]').textContent = translations[currentLanguage].how_to_cook; styles.forEach(style => { const button = document.createElement('button'); button.textContent = style; button.className = 'style-btn w-full bg-white p-4 rounded-lg shadow border-2 border-gray-200 hover:border-green-500 hover:text-green-600 font-semibold'; if (style === translations['zh'].ai_creative_style || style === translations['en'].ai_creative_style) { button.classList.add('bg-green-100', 'text-green-700'); } button.onclick = () => { resultContainer.innerHTML = `<div class="bg-white p-6 rounded-xl shadow-md"><div class="bg-gray-200 h-64 w-full rounded-lg animate-pulse"></div><div class="h-8 bg-gray-200 rounded w-3/4 mt-6 animate-pulse"></div></div>`; generateFinalRecipe(style, ingredients); }; container.appendChild(button); }); resultContainer.appendChild(styleCard); setLoading(false); }
-        function displayRecipe(data, imageUrl) { resultContainer.innerHTML = ''; const card = templates.recipeCard.content.cloneNode(true); const elementsToTranslate = card.querySelectorAll('[data-translate]'); elementsToTranslate.forEach(el => { const key = el.getAttribute('data-translate'); if (translations[currentLanguage][key]) { el.textContent = translations[currentLanguage][key]; } }); card.querySelector('#recipe-image').src = imageUrl; card.querySelector('#recipe-image').alt = `Image of ${data.recipeName}`; card.querySelector('#recipe-name').textContent = data.recipeName; card.querySelector('#recipe-calories').textContent = data.calories; const ingredientsList = card.querySelector('#recipe-ingredients'); ingredientsList.innerHTML = ''; data.ingredients.forEach(item => { const li = document.createElement('li'); li.textContent = `${item.name} - ${item.quantity}`; ingredientsList.appendChild(li); }); const instructionsDiv = card.querySelector('#recipe-instructions'); instructionsDiv.innerHTML = ''; data.instructions.forEach((step, index) => { const p = document.createElement('p'); p.innerHTML = `<strong class="text-green-600">${translations[currentLanguage].step_label} ${index + 1}:</strong> ${step}`; instructionsDiv.appendChild(p); }); resultContainer.appendChild(card); }
+        function displayRecipe(data, imageUrl) { resultContainer.innerHTML = ''; const card = templates.recipeCard.content.cloneNode(true); const elementsToTranslate = card.querySelectorAll('[data-translate]'); elementsToTranslate.forEach(el => { const key = el.getAttribute('data-translate'); if (translations[currentLanguage][key]) { el.textContent = translations[currentLanguage][key]; } }); 
+            
+            // --- 侦探模式修改点 ---
+            const imageElement = card.querySelector('#recipe-image');
+            imageElement.src = imageUrl;
+            // 我们把收到的食谱名称也放在alt里，方便比对
+            imageElement.alt = `[IMAGE FOR: ${data.recipeName}]`; 
+
+            card.querySelector('#recipe-name').textContent = data.recipeName; 
+            card.querySelector('#recipe-calories').textContent = data.calories; 
+            const ingredientsList = card.querySelector('#recipe-ingredients'); 
+            ingredientsList.innerHTML = ''; 
+            data.ingredients.forEach(item => { const li = document.createElement('li'); li.textContent = `${item.name} - ${item.quantity}`; ingredientsList.appendChild(li); }); 
+            const instructionsDiv = card.querySelector('#recipe-instructions'); 
+            instructionsDiv.innerHTML = ''; 
+            data.instructions.forEach((step, index) => { const p = document.createElement('p'); p.innerHTML = `<strong class="text-green-600">${translations[currentLanguage].step_label} ${index + 1}:</strong> ${step}`; instructionsDiv.appendChild(p); }); 
+            resultContainer.appendChild(card); 
+        }
         
         // --- API HELPERS (SECURE PROXY VERSION) ---
         async function makeApiCallWithRetry(targetApi, payload, maxRetries = 3) {
@@ -204,16 +232,22 @@
         async function getCookingStyles(ingredients) { const langInstruction = currentLanguage === 'en' ? 'English' : 'Chinese'; const prompt = `In JSON array format, list the 4 most popular classic dish names for '${ingredients}' in the Malaysia/Singapore region. Respond in ${langInstruction}. Example: ["Style A", "Style B"]`; const payload = { contents: [{ parts: [{ text: prompt }] }], generationConfig: { responseMimeType: "application/json" } }; const result = await makeApiCallWithRetry('gemini', payload); const text = result?.candidates?.[0]?.content?.parts?.[0]?.text; let styles = []; try { styles = JSON.parse(text); if (!Array.isArray(styles)) styles = []; } catch { styles = []; } styles.push(translations[currentLanguage].ai_creative_style); return styles; }
         async function generateRecipe(style, ingredients) { const langInstruction = currentLanguage === 'en' ? 'Respond in English.' : '請用中文回答。'; let prompt; const baseRule = `\n\n**Rules:**\n1. Steps must be logical for a home cook.\n2. Quantities must be reasonable.\nPlease respond STRICTLY in the following JSON format:\n- recipeName (string), description (string), calories (number), ingredients (array of {name, quantity}), instructions (array of strings).\n${langInstruction}`; if (style === translations[currentLanguage].ai_creative_style) { prompt = `You are an experienced home cook. Design a delicious, logical recipe based on these ingredients: ${ingredients}. Create a suitable name for it.` + baseRule; } else { prompt = `You are a professional chef. Provide a detailed, authentic recipe for '${style}'. Main ingredients are '${ingredients}'. The recipe name must be '${style}'.` + baseRule; } const payload = { contents: [{ parts: [{ text: prompt }] }], generationConfig: { responseMimeType: "application/json", responseSchema: { type: "OBJECT", properties: { recipeName: { type: "STRING" }, description: { type: "STRING" }, calories: { type: "NUMBER" }, ingredients: { type: "ARRAY", items: { type: "OBJECT", properties: { name: { type: "STRING" }, quantity: { type: "STRING" } }, required: ["name", "quantity"] } }, instructions: { type: "ARRAY", items: { type: "STRING" } } }, required: ["recipeName", "description", "calories", "ingredients", "instructions"] } } }; const result = await makeApiCallWithRetry('gemini', payload); const text = result?.candidates?.[0]?.content?.parts?.[0]?.text; if (text) { try { return JSON.parse(text); } catch(e) { console.error("Failed to parse recipe JSON:", text); throw new Error("AI returned invalid recipe format."); } } return null; }
         
-        // --- 最终的图片方案: 图片字典 ---
+        // --- 侦探模式版图片函数 ---
         function getImageForRecipe(recipeName) {
-            // 我们检查食谱名称包含哪个关键字，然后返回对应的图片
+            console.log("--- Starting Image Search ---");
+            console.log(`Received recipe name: "${recipeName}"`);
+
             for (const keyword in imageMap) {
-                if (keyword === 'default') continue; // Skip default case in loop
+                if (keyword === 'default') continue; 
+                
+                console.log(`Checking for keyword: "${keyword}"`);
                 if (recipeName.includes(keyword)) {
+                    console.log(`SUCCESS: Found keyword "${keyword}" in "${recipeName}". Returning specific image.`);
                     return imageMap[keyword];
                 }
             }
-            // 如果都找不到，就返回默认的精美食物图片
+            
+            console.log("FAIL: No keywords found. Returning default image.");
             return imageMap['default'];
         }
 
