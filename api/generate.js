@@ -1,4 +1,4 @@
-// File: /api/generate.js (The Final Plan A Version)
+// File: /api/generate.js (v2.1 - Streaming Version)
 
 // 使用最穩定、兼容性最好的 CommonJS 語法
 module.exports = async (request, response) => {
@@ -23,10 +23,10 @@ module.exports = async (request, response) => {
       return response.status(500).json({ message: 'API key is not configured on the server.' });
     }
 
-    // 我們的通訊錄，現在同時有文字AI和圖片AI的地址
+    // 我們的通訊錄，現在使用支援串流的地址
     const API_URLS = {
+      geminiStream: `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:streamGenerateContent?key=${API_KEY}`,
       gemini: `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${API_KEY}`,
-      // 圖片AI的正確地址
       imagen: `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${API_KEY}`
     };
 
@@ -50,14 +50,36 @@ module.exports = async (request, response) => {
       return response.status(apiResponse.status).json({ message: 'Google API Error', details: errorText });
     }
 
-    const data = await apiResponse.json();
-    
-    // 任務成功！把從 Google 獲得的結果傳回給前端
-    return response.status(200).json(data);
+    // --- 串流核心 ---
+    // 設定正確的標頭，告訴前端我們要開始“直播”了
+    response.setHeader('Content-Type', 'text/event-stream; charset=utf-8');
+    response.setHeader('Cache-Control', 'no-cache');
+    response.setHeader('Connection', 'keep-alive');
+
+    const reader = apiResponse.body.getReader();
+    const decoder = new TextDecoder('utf-8');
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) {
+        break;
+      }
+      // 將收到的每一個數據片段，立刻轉發給前端
+      response.write(decoder.decode(value));
+    }
+
+    // 直播結束
+    response.end();
 
   } catch (error) {
     // 捕捉所有未預料的錯誤
     console.error("Fatal Error in API Proxy:", error);
-    return response.status(500).json({ message: 'An unexpected error occurred within the API proxy.', details: error.message });
+    // 如果串流尚未開始，發送錯誤JSON
+    if (!response.headersSent) {
+        response.status(500).json({ message: 'An unexpected error occurred within the API proxy.', details: error.message });
+    } else {
+        // 如果串流已開始，只能結束它
+        response.end();
+    }
   }
 };
