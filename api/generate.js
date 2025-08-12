@@ -1,4 +1,4 @@
-// File: /api/generate.js (v2.2 - Stable Aggregating Version)
+// File: /api/generate.js (v2.2 - Final Corrected Version)
 
 // 使用最穩定、兼容性最好的 CommonJS 語法
 module.exports = async (request, response) => {
@@ -25,7 +25,7 @@ module.exports = async (request, response) => {
 
     // 我們的通訊錄
     const API_URLS = {
-      // 我們在後端使用串流來加速，但會組合好再回傳
+      // 對於文字，我們在後端使用串流來加速，但會組合好再回傳
       gemini: `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:streamGenerateContent?key=${API_KEY}`,
       imagen: `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${API_KEY}`
     };
@@ -72,19 +72,37 @@ module.exports = async (request, response) => {
     jsonChunks.forEach(chunk => {
         try {
             const parsed = JSON.parse(chunk);
-            combinedText += parsed.candidates[0].content.parts[0].text;
+            if (parsed.candidates && parsed.candidates[0].content.parts[0].text) {
+                combinedText += parsed.candidates[0].content.parts[0].text;
+            }
         } catch (e) {
             // 忽略無法解析的數據塊
         }
     });
 
-    // 將最終組合好的、乾淨的JSON物件回傳給前端
-    try {
-        const finalJson = JSON.parse(combinedText);
-        return response.status(200).json(finalJson);
-    } catch(e) {
-        console.error("Failed to parse combined text from stream:", combinedText);
-        return response.status(500).json({ message: 'Failed to parse AI response stream.' });
+    // --- 關鍵修正 ---
+    // 檢查原始請求是否要求JSON格式
+    if (payload.generationConfig && payload.generationConfig.responseMimeType === "application/json") {
+        try {
+            // 如果是，就把它當作JSON來解析
+            const finalJson = JSON.parse(combinedText);
+            return response.status(200).json(finalJson);
+        } catch(e) {
+            console.error("Failed to parse combined JSON text from stream:", combinedText);
+            return response.status(500).json({ message: 'Failed to parse AI response stream as JSON.' });
+        }
+    } else {
+        // 如果只是普通文字，就把它包裝成前端期望的格式回傳
+        const textResponse = {
+            candidates: [{
+                content: {
+                    parts: [{
+                        text: combinedText
+                    }]
+                }
+            }]
+        };
+        return response.status(200).json(textResponse);
     }
 
   } catch (error) {
