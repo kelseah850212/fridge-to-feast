@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fridge To Feast (v2.2 Final)</title>
+    <title>Fridge To Feast (v3.0 Production Ready)</title>
     
     <!-- Google tag (gtag.js) - Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-RQYJNTJQ1D"></script>
@@ -242,7 +242,7 @@
         // --- HELPER FUNCTIONS ---
         function getSelectedPreferences() {
             const activeButtons = preferencesContainer.querySelectorAll('.preference-btn.active');
-            return Array.from(activeButtons).map(btn => btn.textContent);
+            return Array.from(activeButtons).map(btn => btn.dataset.preference);
         }
 
         // --- MAIN LOGIC ---
@@ -288,7 +288,7 @@
 
                 if (preloadedRecipe) {
                     recipeData = preloadedRecipe;
-                    imageUrl = recipeData.imageUrl; // Use preloaded image
+                    imageUrl = recipeData.imageUrl; 
                 } else {
                     setLoading(true, translations[currentLanguage].generating_recipe);
                     recipeData = await generateRecipe(style, ingredients, preferences);
@@ -372,68 +372,151 @@
             resultContainer.appendChild(card); 
         }
         
-        // --- API HELPERS (MOCK FOR LOCAL TESTING) ---
+        // --- API HELPERS (REAL, PRODUCTION VERSION) ---
         async function makeApiCallWithRetry(targetApi, payload, maxRetries = 3) {
-            // This is a mock function for local testing.
-            // It simulates the behavior of calling a server-side proxy.
-            // In a real deployment on Vercel, this would be a real fetch call.
-            console.log(`Simulating API call to ${targetApi} with payload:`, payload);
-            
-            // Simulate network delay
-            await new Promise(resolve => setTimeout(resolve, 500));
+            let attempt = 0;
+            while (attempt < maxRetries) {
+                try {
+                    // NOTE: In a real production app, you would have a backend proxy.
+                    // For this Vercel deployment, we assume the /api/generate endpoint is set up.
+                    const response = await fetch('/api/generate', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            targetApi: targetApi,
+                            payload: payload
+                        })
+                    });
 
-            // Since we are testing locally without a server, we cannot actually call the AI.
-            // We will return a simulated error for image generation to test error handling,
-            // and a simulated success for other calls.
-            if (targetApi === 'imagen') {
-                return { predictions: [{ bytesBase64Encoded: null }] }; // Simulate a failed image generation
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        console.error("API Proxy Error Response:", errorText);
+                        throw new Error(`API Proxy Error ${response.status}`);
+                    }
+                    return await response.json();
+                } catch (error) {
+                    attempt++;
+                    console.error(`API call attempt ${attempt} failed. Retrying...`, error);
+                    if (attempt >= maxRetries) {
+                        console.error("API call failed after max retries.");
+                        throw error;
+                    };
+                    await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 1000));
+                }
             }
-            if (targetApi === 'gemini' && payload.generationConfig?.responseMimeType === "application/json") {
-                 return { candidates: [{ content: { parts: [{ text: '["炒蛋", "蒸蛋", "番茄炒蛋", "歐姆蛋"]' }] } }] };
-            }
-            if (targetApi === 'gemini') {
-                 return { candidates: [{ content: { parts: [{ text: 'ingredients' }] } }] };
-            }
-            
-            // Fallback for unexpected calls
-            return Promise.reject(new Error("Simulated API call failed. This is expected in local testing."));
         }
         
         async function determineInputType(userInput) { 
-            // In local testing, we simplify this. A real call would be made on the server.
+            const prompt = `Analyze the following text and determine if it's a 'list of ingredients' or a 'recipe name'. Text: "${userInput}". Respond with only "ingredients" or "recipe_name".`; 
+            const payload = { contents: [{ parts: [{ text: prompt }] }] }; 
+            const result = await makeApiCallWithRetry('gemini', payload); 
+            const text = result?.candidates?.[0]?.content?.parts?.[0]?.text?.trim().replace(/"/g, ''); 
+            if (text === 'ingredients' || text === 'recipe_name') return text; 
+            // Fallback logic
             return userInput.includes(',') || userInput.split(' ').length > 2 ? 'ingredients' : 'recipe_name'; 
         }
         
         async function getCookingStyles(ingredients, preferences) { 
-            console.log("Simulating getCookingStyles for:", ingredients);
-            const styles = ["家常炒" + ingredients, "清蒸" + ingredients, "紅燒" + ingredients];
+            const langInstruction = currentLanguage === 'en' ? 'English' : 'Chinese';
+            const preferenceText = preferences.length > 0 ? ` considering these preferences: ${preferences.join(', ')}` : '';
+            const prompt = `In JSON array format, list the 4 most popular classic dish names for '${ingredients}' in the Malaysia/Singapore region${preferenceText}. Respond in ${langInstruction}. Example: ["Style A", "Style B"]`; 
+            const payload = { contents: [{ parts: [{ text: prompt }] }], generationConfig: { responseMimeType: "application/json" } }; 
+            const result = await makeApiCallWithRetry('gemini', payload); 
+            const text = result?.candidates?.[0]?.content?.parts?.[0]?.text; 
+            let styles = []; 
+            try { 
+                styles = JSON.parse(text); 
+                if (!Array.isArray(styles)) styles = []; 
+            } catch { 
+                styles = []; 
+            } 
             styles.push(translations[currentLanguage].ai_creative_style); 
             return styles; 
         }
 
         async function generateRecipe(style, ingredients, preferences) { 
-            console.log("Simulating generateRecipe for:", style);
-            // Return a mock recipe structure for local testing
-            return {
-                recipeName: `AI生成的 ${style}`,
-                calories: 350,
-                ingredients: [
-                    { name: ingredients, quantity: "200克" },
-                    { name: "醬油", quantity: "1湯匙" },
-                    { name: "蔥", quantity: "少許" }
-                ],
-                instructions: [
-                    `將 ${ingredients} 洗淨切好。`,
-                    "熱鍋下油，放入食材翻炒。",
-                    "加入調味料，煮熟即可。"
-                ]
-            };
+            const langInstruction = currentLanguage === 'en' ? 'Respond in English.' : '請用中文回答。';
+            const preferenceText = preferences.length > 0 ? `\n3. CRITICAL: The recipe MUST strictly adhere to the following dietary preferences: ${preferences.join(', ')}.` : '';
+            const baseRule = `\n\n**Rules:**\n1. Steps must be logical for a home cook.\n2. Quantities must be reasonable.${preferenceText}\nPlease respond STRICTLY in the following JSON format:\n- recipeName (string), description (string), calories (number), ingredients (array of {name, quantity}), instructions (array of strings).\n${langInstruction}`; 
+            
+            let prompt;
+            if (style === translations[currentLanguage].ai_creative_style) { 
+                prompt = `You are an experienced home cook. Design a delicious, logical recipe based on these ingredients: ${ingredients}. Create a suitable name for it.` + baseRule; 
+            } else { 
+                prompt = `You are a professional chef. Provide a detailed, authentic recipe for '${style}'. Main ingredients are '${ingredients}'. The recipe name must be '${style}'.` + baseRule; 
+            } 
+            
+            const payload = { 
+                contents: [{ parts: [{ text: prompt }] }], 
+                generationConfig: { 
+                    responseMimeType: "application/json", 
+                    responseSchema: { 
+                        type: "OBJECT", 
+                        properties: { 
+                            recipeName: { type: "STRING" }, 
+                            description: { type: "STRING" }, 
+                            calories: { type: "NUMBER" }, 
+                            ingredients: { 
+                                type: "ARRAY", 
+                                items: { 
+                                    type: "OBJECT", 
+                                    properties: { 
+                                        name: { type: "STRING" }, 
+                                        quantity: { type: "STRING" } 
+                                    }, 
+                                    required: ["name", "quantity"] 
+                                } 
+                            }, 
+                            instructions: { 
+                                type: "ARRAY", 
+                                items: { type: "STRING" } 
+                            } 
+                        }, 
+                        required: ["recipeName", "description", "calories", "ingredients", "instructions"] 
+                    } 
+                } 
+            }; 
+            const result = await makeApiCallWithRetry('gemini', payload); 
+            const text = result?.candidates?.[0]?.content?.parts?.[0]?.text; 
+            if (text) { 
+                try { 
+                    return JSON.parse(text); 
+                } catch(e) { 
+                    console.error("Failed to parse recipe JSON:", text, e); 
+                    throw new Error("AI returned invalid recipe format."); 
+                } 
+            } 
+            return null; 
         }
         
         async function generateImageWithArtDirector(recipeData, originalIngredients) {
-            console.log("Simulating generateImageWithArtDirector for:", recipeData.recipeName);
-            // Always return a placeholder for local testing to avoid real API calls
-            return `https://placehold.co/600x400/999999/FFFFFF?text=AI+Image+for+${encodeURIComponent(recipeData.recipeName)}`;
+            const artDirectorPrompt = await createVisualPrompt(recipeData.recipeName, originalIngredients);
+            if (!artDirectorPrompt) {
+                console.warn("Art Director failed. Falling back to basic image generation.");
+                const fallbackPrompt = `Professional food photography of a dish named '${recipeData.recipeName}' with main ingredients '${originalIngredients}'.`;
+                return await generateImage(fallbackPrompt);
+            }
+            setLoading(true, translations[currentLanguage].generating_image);
+            return await generateImage(artDirectorPrompt);
+        }
+
+        async function createVisualPrompt(recipeName, ingredients) {
+            const prompt = `Act as a professional food stylist. I will give you a dish name. Your task is to write a single, detailed paragraph in English for an AI image generator. This description should be a visually rich "prompt" that describes the dish's appearance, plating, texture, and common garnishes. Be specific about the cultural context (e.g., Japanese, Thai, Chinese).\n\nDish Name: "${recipeName}"\nMain Ingredients: "${ingredients}"\n\nProvide the detailed English visual description now.`;
+            const payload = { contents: [{ parts: [{ text: prompt }] }] };
+            const result = await makeApiCallWithRetry('gemini', payload);
+            return result?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || null;
+        }
+        
+        async function generateImage(prompt) {
+            const payload = { instances: [{ prompt: prompt }], parameters: { "sampleCount": 1 } };
+            const result = await makeApiCallWithRetry('imagen', payload);
+
+            const base64Data = result?.predictions?.[0]?.bytesBase64Encoded;
+            if (base64Data) {
+                return `data:image/png;base64,${base64Data}`;
+            }
+            // Fallback image if generation fails
+            return `https://placehold.co/600x400/CCCCCC/FFFFFF?text=Image+Generation+Failed`;
         }
 
     </script>
