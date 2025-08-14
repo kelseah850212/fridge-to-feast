@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fridge To Feast (v3.0 Production Ready)</title>
+    <title>Fridge To Feast (v3.2 Production Ready)</title>
     
     <!-- Google tag (gtag.js) - Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-RQYJNTJQ1D"></script>
@@ -143,7 +143,6 @@
             '擂茶': {
                 zh: {
                     recipeName: "正宗客家擂茶",
-                    imageUrl: "https://placehold.co/600x400/2E8B57/FFFFFF?text=%E6%AD%A3%E5%AE%97%E5%AE%A2%E5%AE%B6%E擂%E8%8C%B6",
                     calories: 450,
                     ingredients: [
                         { name: "綠茶葉", quantity: "1湯匙" },
@@ -168,7 +167,6 @@
                 },
                 en: {
                     recipeName: "Authentic Hakka Lei Cha",
-                    imageUrl: "https://placehold.co/600x400/2E8B57/FFFFFF?text=Authentic+Hakka+Lei+Cha",
                     calories: 450,
                     ingredients: [
                         { name: "Green Tea Leaves", quantity: "1 tbsp" },
@@ -261,7 +259,8 @@
                 const expertRecipeKey = Object.keys(expertRecipes).find(key => trimmedInput.includes(key));
                 if (expertRecipeKey) {
                     const recipeData = expertRecipes[expertRecipeKey][currentLanguage];
-                    await generateFinalRecipe(null, null, null, recipeData);
+                    // Pass the recipe name as the ingredient for image generation
+                    await generateFinalRecipe(null, recipeData.recipeName, [], recipeData);
                     return;
                 }
 
@@ -284,19 +283,18 @@
         async function generateFinalRecipe(style, ingredients, preferences, preloadedRecipe = null) {
             try {
                 let recipeData;
-                let imageUrl;
-
                 if (preloadedRecipe) {
                     recipeData = preloadedRecipe;
-                    imageUrl = recipeData.imageUrl; 
                 } else {
                     setLoading(true, translations[currentLanguage].generating_recipe);
                     recipeData = await generateRecipe(style, ingredients, preferences);
                     if (!recipeData) throw new Error(translations[currentLanguage].error_recipe_gen);
-                    
-                    setLoading(true, translations[currentLanguage].art_director);
-                    imageUrl = await generateImageWithArtDirector(recipeData, ingredients);
                 }
+                
+                setLoading(true, translations[currentLanguage].art_director);
+                // Use the recipe name for a better image prompt.
+                const imagePromptIngredients = preloadedRecipe ? recipeData.recipeName : ingredients;
+                const imageUrl = await generateImageWithArtDirector(recipeData, imagePromptIngredients);
                 
                 displayRecipe(recipeData, imageUrl);
 
