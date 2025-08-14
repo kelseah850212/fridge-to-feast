@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fridge To Feast (v2.0 Preferences)</title>
+    <title>Fridge To Feast (v2.2 Final)</title>
     
     <!-- Google tag (gtag.js) - Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-RQYJNTJQ1D"></script>
@@ -11,7 +11,6 @@
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
-    
       gtag('config', 'G-RQYJNTJQ1D');
     </script>
 
@@ -35,6 +34,13 @@
             border-color: #10B981;
             box-shadow: 0 2px 6px rgba(16, 185, 129, 0.3);
         }
+        .popular-search-btn {
+            transition: all 0.2s ease-in-out;
+        }
+        .popular-search-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
     </style>
 
 </head>
@@ -54,13 +60,36 @@
                     <i class="fas fa-search mr-2"></i><span data-translate="start_button">開始</span>
                 </button>
             </div>
-            <!-- v2.0 新增: 飲食偏好按鈕 -->
             <div id="preferences-container" class="mt-4 flex flex-wrap justify-center gap-3">
                 <button class="preference-btn py-2 px-4 bg-white border-2 border-gray-200 rounded-full text-sm font-semibold text-gray-600" data-preference="vegetarian" data-translate="pref_vegetarian">素食</button>
                 <button class="preference-btn py-2 px-4 bg-white border-2 border-gray-200 rounded-full text-sm font-semibold text-gray-600" data-preference="low-calorie" data-translate="pref_low_calorie">低熱量</button>
                 <button class="preference-btn py-2 px-4 bg-white border-2 border-gray-200 rounded-full text-sm font-semibold text-gray-600" data-preference="spicy" data-translate="pref_spicy">要辣</button>
             </div>
         </div>
+        
+        <div id="initial-content-container" class="mt-8">
+            <div class="bg-white p-6 rounded-xl shadow-md">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4" data-translate="welcome_title">歡迎來到 Fridge To Feast！</h2>
+                <p class="text-gray-600 mb-6" data-translate="welcome_text">再也不用煩惱冰箱裡的食材能做什麼菜。我們利用 AI 為您創造美味食譜，將剩餘食材變成餐桌上的盛宴！</p>
+                
+                <h3 class="text-xl font-semibold text-gray-700 border-b-2 border-green-500 pb-2 mb-4" data-translate="how_to_use_title">如何使用？</h3>
+                <ol class="list-decimal list-inside space-y-2 text-gray-600 mb-6">
+                    <li data-translate="step1_text">在上面的搜尋框中，輸入您擁有的食材（例如：雞蛋, 番茄, 洋蔥）。</li>
+                    <li data-translate="step2_text">選擇您的飲食偏好（例如：素食、要辣）。</li>
+                    <li data-translate="step3_text">點擊「開始」，讓我們為您變出魔法！</li>
+                </ol>
+
+                <h3 class="text-xl font-semibold text-gray-700 mb-4" data-translate="popular_searches_title">熱門搜尋</h3>
+                <div id="popular-searches-container" class="flex flex-wrap gap-3">
+                    <button class="popular-search-btn bg-green-100 text-green-700 py-2 px-4 rounded-full font-semibold" data-search="雞蛋">🍳 雞蛋</button>
+                    <button class="popular-search-btn bg-blue-100 text-blue-700 py-2 px-4 rounded-full font-semibold" data-search="雞肉">🍗 雞肉</button>
+                    <button class="popular-search-btn bg-red-100 text-red-700 py-2 px-4 rounded-full font-semibold" data-search="番茄">🍅 番茄</button>
+                    <button class="popular-search-btn bg-yellow-100 text-yellow-700 py-2 px-4 rounded-full font-semibold" data-search="馬鈴薯">🥔 馬鈴薯</button>
+                    <button class="popular-search-btn bg-teal-100 text-teal-700 py-2 px-4 rounded-full font-semibold" data-search="擂茶">🍵 擂茶</button>
+                </div>
+            </div>
+        </div>
+
         <div id="result-container" class="mt-8"></div>
     </div>
 
@@ -101,13 +130,69 @@
             }
             return true;
         };
-
+        
         // --- I18N ---
         const translations = {
-            zh: { lang_switcher: "English", main_title: "Fridge To Feast", subtitle: "輸入食材找靈感，或直接搜尋菜名！", input_placeholder: "例如: 雞蛋, 番茄", start_button: "開始", thinking: "思考中...", generating_recipe: "生成食譜中...", generating_image: "繪製圖片中...", art_director: "聘請造型師...", how_to_cook: "你想怎麼煮？", ai_creative_style: "AI創意煮法", image_ref_note: "图片只供参考", calories_label: "預估卡路里", calories_note: "(估算值)", ingredients_label: "所需食材", instructions_label: "做法", error_title: "噢不，出錯了！", error_input_required: "請輸入食材或菜名！", error_generic: "無法處理您的請求，請稍後再試。", error_recipe_gen: "生成食譜失敗，請稍後再試。", step_label: "步驟", pref_vegetarian: "素食", pref_low_calorie: "低熱量", pref_spicy: "要辣" },
-            en: { lang_switcher: "中文", main_title: "Fridge To Feast", subtitle: "Enter ingredients for ideas, or search for a recipe directly!", input_placeholder: "e.g., egg, tomato", start_button: "Start", thinking: "Thinking...", generating_recipe: "Generating Recipe...", generating_image: "Creating Image...", art_director: "Hiring Art Director...", how_to_cook: "How would you like to cook it?", ai_creative_style: "AI Creative Style", image_ref_note: "Image for reference only", calories_label: "Est. Calories", calories_note: "(approx.)", ingredients_label: "Ingredients", instructions_label: "Instructions", error_title: "Oh no, an error occurred!", error_input_required: "Please enter ingredients or a recipe name!", error_generic: "Could not process your request. Please try again later.", error_recipe_gen: "Failed to generate recipe. Please try again later.", step_label: "Step", pref_vegetarian: "Vegetarian", pref_low_calorie: "Low-Calorie", pref_spicy: "Spicy" }
+            zh: { lang_switcher: "English", main_title: "Fridge To Feast", subtitle: "輸入食材找靈感，或直接搜尋菜名！", input_placeholder: "例如: 雞蛋, 番茄", start_button: "開始", thinking: "思考中...", generating_recipe: "生成食譜中...", generating_image: "繪製圖片中...", art_director: "聘請造型師...", how_to_cook: "你想怎麼煮？", ai_creative_style: "AI創意煮法", image_ref_note: "图片只供参考", calories_label: "預估卡路里", calories_note: "(估算值)", ingredients_label: "所需食材", instructions_label: "做法", error_title: "噢不，出錯了！", error_input_required: "請輸入食材或菜名！", error_generic: "無法處理您的請求，請稍後再試。", error_recipe_gen: "生成食譜失敗，請稍後再試。", step_label: "步驟", pref_vegetarian: "素食", pref_low_calorie: "低熱量", pref_spicy: "要辣", welcome_title: "歡迎來到 Fridge To Feast！", welcome_text: "再也不用煩惱冰箱裡的食材能做什麼菜。我們利用 AI 為您創造美味食譜，將剩餘食材變成餐桌上的盛宴！", how_to_use_title: "如何使用？", step1_text: "在上面的搜尋框中，輸入您擁有的食材（例如：雞蛋, 番茄, 洋蔥）。", step2_text: "選擇您的飲食偏好（例如：素食、要辣）。", step3_text: "點擊「開始」，讓我們為您變出魔法！", popular_searches_title: "熱門搜尋" },
+            en: { lang_switcher: "中文", main_title: "Fridge To Feast", subtitle: "Enter ingredients for ideas, or search for a recipe directly!", input_placeholder: "e.g., egg, tomato", start_button: "Start", thinking: "Thinking...", generating_recipe: "Generating Recipe...", generating_image: "Creating Image...", art_director: "Hiring Art Director...", how_to_cook: "How would you like to cook it?", ai_creative_style: "AI Creative Style", image_ref_note: "Image for reference only", calories_label: "Est. Calories", calories_note: "(approx.)", ingredients_label: "Ingredients", instructions_label: "Instructions", error_title: "Oh no, an error occurred!", error_input_required: "Please enter ingredients or a recipe name!", error_generic: "Could not process your request. Please try again later.", error_recipe_gen: "Failed to generate recipe. Please try again later.", step_label: "Step", pref_vegetarian: "Vegetarian", pref_low_calorie: "Low-Calorie", pref_spicy: "Spicy", welcome_title: "Welcome to Fridge To Feast!", welcome_text: "Stop wondering what to cook with the ingredients in your fridge. We use AI to create delicious recipes, turning your leftovers into a feast!", how_to_use_title: "How to Use?", step1_text: "Enter the ingredients you have in the search bar above (e.g., egg, tomato, onion).", step2_text: "Select your dietary preferences (e.g., Vegetarian, Spicy).", step3_text: "Click 'Start' and let us work our magic!", popular_searches_title: "Popular Searches" }
         };
         let currentLanguage = localStorage.getItem('fridgeToFeastLang') || 'zh';
+        
+        // --- Expert Knowledge Base ---
+        const expertRecipes = {
+            '擂茶': {
+                zh: {
+                    recipeName: "正宗客家擂茶",
+                    imageUrl: "https://placehold.co/600x400/2E8B57/FFFFFF?text=%E6%AD%A3%E5%AE%97%E5%AE%A2%E5%AE%B6%E擂%E8%8C%B6",
+                    calories: 450,
+                    ingredients: [
+                        { name: "綠茶葉", quantity: "1湯匙" },
+                        { name: "烤花生", quantity: "50克" },
+                        { name: "烤芝麻", quantity: "2湯匙" },
+                        { name: "薄荷葉", quantity: "1小把" },
+                        { name: "九層塔 (金不換)", quantity: "1小把" },
+                        { name: "長豆", quantity: "100克 (切粒)" },
+                        { name: "菜脯 (甜)", quantity: "3湯匙 (切碎)" },
+                        { name: "豆腐乾", quantity: "2塊 (切丁)" },
+                        { name: "蝦米", quantity: "1湯匙 (可選)" },
+                        { name: "樹仔菜", quantity: "1把" },
+                        { name: "白飯", quantity: "2碗" }
+                    ],
+                    instructions: [
+                        "擂茶醬：將綠茶葉、烤花生、烤芝麻、薄荷葉和九層塔放入擂缽中，用擂棍慢慢研磨成幼滑的糊狀。",
+                        "準備配料：分別將長豆、豆腐乾炒熟。菜脯和蝦米（如果使用）也稍微爆香備用。",
+                        "沖泡茶湯：將研磨好的擂茶醬取出，加入滾水攪拌均勻，依個人喜好用鹽調味。",
+                        "組合：在碗中盛入白飯，鋪上所有準備好的配料。",
+                        "享用：將溫熱的擂茶湯淋在飯上，攪拌均勻即可享用。"
+                    ]
+                },
+                en: {
+                    recipeName: "Authentic Hakka Lei Cha",
+                    imageUrl: "https://placehold.co/600x400/2E8B57/FFFFFF?text=Authentic+Hakka+Lei+Cha",
+                    calories: 450,
+                    ingredients: [
+                        { name: "Green Tea Leaves", quantity: "1 tbsp" },
+                        { name: "Roasted Peanuts", quantity: "50g" },
+                        { name: "Toasted Sesame Seeds", quantity: "2 tbsp" },
+                        { name: "Mint Leaves", quantity: "1 small handful" },
+                        { name: "Basil Leaves", quantity: "1 small handful" },
+                        { name: "Long Beans", quantity: "100g (diced)" },
+                        { name: "Preserved Radish (sweet)", quantity: "3 tbsp (minced)" },
+                        { name: "Firm Tofu", quantity: "2 blocks (diced)" },
+                        { name: "Dried Shrimp", quantity: "1 tbsp (optional)" },
+                        { name: "Mani Cai", quantity: "1 bunch" },
+                        { name: "Cooked Rice", quantity: "2 bowls" }
+                    ],
+                    instructions: [
+                        "Make the tea paste: In a traditional grooved bowl, grind the green tea leaves, roasted peanuts, sesame seeds, mint, and basil into a smooth paste.",
+                        "Prepare toppings: Sauté the long beans and diced tofu separately. Briefly stir-fry the preserved radish and dried shrimp (if using).",
+                        "Make the tea soup: Take the ground tea paste and whisk it with hot water until well combined. Season with salt to your liking.",
+                        "Assemble: Place cooked rice in a bowl and arrange all the prepared toppings over it.",
+                        "Serve: Pour the warm tea soup over the rice and toppings. Mix well and enjoy."
+                    ]
+                }
+            }
+        };
 
         // --- DOM ELEMENTS ---
         const mainInput = document.getElementById('main-input');
@@ -115,6 +200,8 @@
         const resultContainer = document.getElementById('result-container');
         const langSwitcherBtn = document.getElementById('lang-switcher');
         const preferencesContainer = document.getElementById('preferences-container');
+        const initialContentContainer = document.getElementById('initial-content-container');
+        const popularSearchesContainer = document.getElementById('popular-searches-container');
         const templates = { styleSelection: document.getElementById('style-selection-template'), recipeCard: document.getElementById('recipe-card-template'), error: document.getElementById('error-message-template'), };
 
         // --- INITIALIZATION ---
@@ -124,10 +211,17 @@
             mainInput.addEventListener('keyup', (event) => { if (event.key === 'Enter') handleInitialInput(mainInput.value); });
             langSwitcherBtn.addEventListener('click', () => { const newLang = currentLanguage === 'zh' ? 'en' : 'zh'; setLanguage(newLang); });
             
-            // v2.0 新增: 為偏好按鈕加上點擊事件
             preferencesContainer.addEventListener('click', (event) => {
                 if (event.target.classList.contains('preference-btn')) {
                     event.target.classList.toggle('active');
+                }
+            });
+
+            popularSearchesContainer.addEventListener('click', (event) => {
+                if (event.target.matches('.popular-search-btn')) {
+                    const searchTerm = event.target.getAttribute('data-search');
+                    mainInput.value = searchTerm;
+                    handleInitialInput(searchTerm);
                 }
             });
         });
@@ -146,7 +240,6 @@
         }
 
         // --- HELPER FUNCTIONS ---
-        // v2.0 新增: 獲取被選中的偏好
         function getSelectedPreferences() {
             const activeButtons = preferencesContainer.querySelectorAll('.preference-btn.active');
             return Array.from(activeButtons).map(btn => btn.textContent);
@@ -159,17 +252,27 @@
                 displayError(translations[currentLanguage].error_input_required);
                 return;
             }
+
+            initialContentContainer.style.display = 'none';
+            resultContainer.innerHTML = ''; 
             setLoading(true, translations[currentLanguage].thinking);
-            
-            const preferences = getSelectedPreferences(); // v2.0 修改: 獲取偏好
 
             try {
+                const expertRecipeKey = Object.keys(expertRecipes).find(key => trimmedInput.includes(key));
+                if (expertRecipeKey) {
+                    const recipeData = expertRecipes[expertRecipeKey][currentLanguage];
+                    await generateFinalRecipe(null, null, null, recipeData);
+                    return;
+                }
+
+                const preferences = getSelectedPreferences();
                 const inputType = await determineInputType(trimmedInput);
+
                 if (inputType === 'recipe_name') {
-                    await generateFinalRecipe(trimmedInput, trimmedInput, preferences); // v2.0 修改: 傳遞偏好
+                    await generateFinalRecipe(trimmedInput, trimmedInput, preferences);
                 } else {
-                    const styles = await getCookingStyles(trimmedInput, preferences); // v2.0 修改: 傳遞偏好
-                    displayCookingStyles(styles, trimmedInput, preferences); // v2.0 修改: 傳遞偏好
+                    const styles = await getCookingStyles(trimmedInput, preferences);
+                    displayCookingStyles(styles, trimmedInput, preferences);
                 }
             } catch (error) {
                 console.error("Critical Error in Main Flow:", error);
@@ -178,16 +281,25 @@
             }
         }
 
-        async function generateFinalRecipe(style, ingredients, preferences) { // v2.0 修改: 接收偏好
+        async function generateFinalRecipe(style, ingredients, preferences, preloadedRecipe = null) {
             try {
-                setLoading(true, translations[currentLanguage].generating_recipe);
-                const recipeData = await generateRecipe(style, ingredients, preferences); // v2.0 修改: 傳遞偏好
-                if (!recipeData) throw new Error(translations[currentLanguage].error_recipe_gen);
-                
-                setLoading(true, translations[currentLanguage].art_director);
-                const imageUrl = await generateImageWithArtDirector(recipeData, ingredients);
+                let recipeData;
+                let imageUrl;
+
+                if (preloadedRecipe) {
+                    recipeData = preloadedRecipe;
+                    imageUrl = recipeData.imageUrl; // Use preloaded image
+                } else {
+                    setLoading(true, translations[currentLanguage].generating_recipe);
+                    recipeData = await generateRecipe(style, ingredients, preferences);
+                    if (!recipeData) throw new Error(translations[currentLanguage].error_recipe_gen);
+                    
+                    setLoading(true, translations[currentLanguage].art_director);
+                    imageUrl = await generateImageWithArtDirector(recipeData, ingredients);
+                }
                 
                 displayRecipe(recipeData, imageUrl);
+
             } catch (error) {
                 console.error("Error in generateFinalRecipe:", error);
                 displayError(error.message);
@@ -197,9 +309,27 @@
         }
 
         // --- UI DISPLAY ---
-        function setLoading(isLoading, message) { startBtn.disabled = isLoading; startBtn.querySelector('span').textContent = isLoading ? message : translations[currentLanguage].start_button; if (isLoading && message === translations[currentLanguage].thinking) { resultContainer.innerHTML = ''; } }
-        function displayError(message) { resultContainer.innerHTML = ''; const errorCard = templates.error.content.cloneNode(true); const titleEl = errorCard.querySelector('[data-translate="error_title"]'); if (titleEl) titleEl.textContent = translations[currentLanguage].error_title; errorCard.getElementById('error-text').textContent = message; resultContainer.appendChild(errorCard); }
-        function displayCookingStyles(styles, ingredients, preferences) { // v2.0 修改: 接收偏好
+        function setLoading(isLoading, message) { 
+            startBtn.disabled = isLoading; 
+            const span = startBtn.querySelector('span');
+            if(span) {
+                span.textContent = isLoading ? message : translations[currentLanguage].start_button;
+            }
+            if (isLoading && message === translations[currentLanguage].thinking) { 
+                resultContainer.innerHTML = ''; 
+            } 
+        }
+
+        function displayError(message) { 
+            resultContainer.innerHTML = ''; 
+            const errorCard = templates.error.content.cloneNode(true); 
+            const titleEl = errorCard.querySelector('[data-translate="error_title"]'); 
+            if (titleEl) titleEl.textContent = translations[currentLanguage].error_title; 
+            errorCard.getElementById('error-text').textContent = message; 
+            resultContainer.appendChild(errorCard); 
+        }
+
+        function displayCookingStyles(styles, ingredients, preferences) {
             resultContainer.innerHTML = ''; 
             const styleCard = templates.styleSelection.content.cloneNode(true); 
             const container = styleCard.getElementById('style-buttons-container'); 
@@ -213,14 +343,22 @@
                 } 
                 button.onclick = () => { 
                     resultContainer.innerHTML = `<div class="bg-white p-6 rounded-xl shadow-md"><div class="bg-gray-200 h-64 w-full rounded-lg animate-pulse"></div><div class="h-8 bg-gray-200 rounded w-3/4 mt-6 animate-pulse"></div></div>`; 
-                    generateFinalRecipe(style, ingredients, preferences); // v2.0 修改: 傳遞偏好
+                    generateFinalRecipe(style, ingredients, preferences);
                 }; 
                 container.appendChild(button); 
             }); 
             resultContainer.appendChild(styleCard); 
             setLoading(false); 
         }
-        function displayRecipe(data, imageUrl) { resultContainer.innerHTML = ''; const card = templates.recipeCard.content.cloneNode(true); const elementsToTranslate = card.querySelectorAll('[data-translate]'); elementsToTranslate.forEach(el => { const key = el.getAttribute('data-translate'); if (translations[currentLanguage][key]) { el.textContent = translations[currentLanguage][key]; } }); 
+
+        function displayRecipe(data, imageUrl) { 
+            resultContainer.innerHTML = ''; 
+            const card = templates.recipeCard.content.cloneNode(true); 
+            const elementsToTranslate = card.querySelectorAll('[data-translate]'); 
+            elementsToTranslate.forEach(el => { 
+                const key = el.getAttribute('data-translate'); 
+                if (translations[currentLanguage][key]) { el.textContent = translations[currentLanguage][key]; } 
+            }); 
             card.querySelector('#recipe-image').src = imageUrl;
             card.querySelector('#recipe-image').alt = `Image of ${data.recipeName}`; 
             card.querySelector('#recipe-name').textContent = data.recipeName; 
@@ -234,100 +372,68 @@
             resultContainer.appendChild(card); 
         }
         
-        // --- API HELPERS (SECURE PROXY VERSION) ---
+        // --- API HELPERS (MOCK FOR LOCAL TESTING) ---
         async function makeApiCallWithRetry(targetApi, payload, maxRetries = 3) {
-            let attempt = 0;
-            while (attempt < maxRetries) {
-                try {
-                    const response = await fetch('/api/generate', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            targetApi: targetApi,
-                            payload: payload
-                        })
-                    });
+            // This is a mock function for local testing.
+            // It simulates the behavior of calling a server-side proxy.
+            // In a real deployment on Vercel, this would be a real fetch call.
+            console.log(`Simulating API call to ${targetApi} with payload:`, payload);
+            
+            // Simulate network delay
+            await new Promise(resolve => setTimeout(resolve, 500));
 
-                    if (!response.ok) {
-                        const errorText = await response.text();
-                        console.error("API Proxy Error Response:", errorText);
-                        throw new Error(`API Proxy Error ${response.status}`);
-                    }
-                    return await response.json();
-                } catch (error) {
-                    attempt++;
-                    if (attempt >= maxRetries) throw error;
-                    await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 1000));
-                }
+            // Since we are testing locally without a server, we cannot actually call the AI.
+            // We will return a simulated error for image generation to test error handling,
+            // and a simulated success for other calls.
+            if (targetApi === 'imagen') {
+                return { predictions: [{ bytesBase64Encoded: null }] }; // Simulate a failed image generation
             }
+            if (targetApi === 'gemini' && payload.generationConfig?.responseMimeType === "application/json") {
+                 return { candidates: [{ content: { parts: [{ text: '["炒蛋", "蒸蛋", "番茄炒蛋", "歐姆蛋"]' }] } }] };
+            }
+            if (targetApi === 'gemini') {
+                 return { candidates: [{ content: { parts: [{ text: 'ingredients' }] } }] };
+            }
+            
+            // Fallback for unexpected calls
+            return Promise.reject(new Error("Simulated API call failed. This is expected in local testing."));
         }
         
-        async function determineInputType(userInput) { const prompt = `Analyze the following text and determine if it's a 'list of ingredients' or a 'recipe name'. Text: "${userInput}". Respond with only "ingredients" or "recipe_name".`; const payload = { contents: [{ parts: [{ text: prompt }] }] }; const result = await makeApiCallWithRetry('gemini', payload); const text = result?.candidates?.[0]?.content?.parts?.[0]?.text?.trim().replace(/"/g, ''); if (text === 'ingredients' || text === 'recipe_name') return text; return userInput.includes(',') || userInput.split(' ').length > 2 ? 'ingredients' : 'recipe_name'; }
+        async function determineInputType(userInput) { 
+            // In local testing, we simplify this. A real call would be made on the server.
+            return userInput.includes(',') || userInput.split(' ').length > 2 ? 'ingredients' : 'recipe_name'; 
+        }
         
-        async function getCookingStyles(ingredients, preferences) { // v2.0 修改: 接收偏好
-            const langInstruction = currentLanguage === 'en' ? 'English' : 'Chinese';
-            const preferenceText = preferences.length > 0 ? ` considering these preferences: ${preferences.join(', ')}` : '';
-            const prompt = `In JSON array format, list the 4 most popular classic dish names for '${ingredients}' in the Malaysia/Singapore region${preferenceText}. Respond in ${langInstruction}. Example: ["Style A", "Style B"]`; 
-            const payload = { contents: [{ parts: [{ text: prompt }] }], generationConfig: { responseMimeType: "application/json" } }; 
-            const result = await makeApiCallWithRetry('gemini', payload); 
-            const text = result?.candidates?.[0]?.content?.parts?.[0]?.text; 
-            let styles = []; 
-            try { styles = JSON.parse(text); if (!Array.isArray(styles)) styles = []; } catch { styles = []; } 
+        async function getCookingStyles(ingredients, preferences) { 
+            console.log("Simulating getCookingStyles for:", ingredients);
+            const styles = ["家常炒" + ingredients, "清蒸" + ingredients, "紅燒" + ingredients];
             styles.push(translations[currentLanguage].ai_creative_style); 
             return styles; 
         }
 
-        async function generateRecipe(style, ingredients, preferences) { // v2.0 修改: 接收偏好
-            const langInstruction = currentLanguage === 'en' ? 'Respond in English.' : '請用中文回答。'; 
-            let prompt; 
-            
-            const preferenceText = preferences.length > 0 ? `\n3. CRITICAL: The recipe MUST strictly adhere to the following dietary preferences: ${preferences.join(', ')}.` : '';
-
-            const baseRule = `\n\n**Rules:**\n1. Steps must be logical for a home cook.\n2. Quantities must be reasonable.${preferenceText}\nPlease respond STRICTLY in the following JSON format:\n- recipeName (string), description (string), calories (number), ingredients (array of {name, quantity}), instructions (array of strings).\n${langInstruction}`; 
-            
-            if (style === translations[currentLanguage].ai_creative_style) { 
-                prompt = `You are an experienced home cook. Design a delicious, logical recipe based on these ingredients: ${ingredients}. Create a suitable name for it.` + baseRule; 
-            } else { 
-                prompt = `You are a professional chef. Provide a detailed, authentic recipe for '${style}'. Main ingredients are '${ingredients}'. The recipe name must be '${style}'.` + baseRule; 
-            } 
-            
-            const payload = { contents: [{ parts: [{ text: prompt }] }], generationConfig: { responseMimeType: "application/json", responseSchema: { type: "OBJECT", properties: { recipeName: { type: "STRING" }, description: { type: "STRING" }, calories: { type: "NUMBER" }, ingredients: { type: "ARRAY", items: { type: "OBJECT", properties: { name: { type: "STRING" }, quantity: { type: "STRING" } }, required: ["name", "quantity"] } }, instructions: { type: "ARRAY", items: { type: "STRING" } } }, required: ["recipeName", "description", "calories", "ingredients", "instructions"] } } }; 
-            const result = await makeApiCallWithRetry('gemini', payload); 
-            const text = result?.candidates?.[0]?.content?.parts?.[0]?.text; 
-            if (text) { 
-                try { return JSON.parse(text); } catch(e) { console.error("Failed to parse recipe JSON:", text); throw new Error("AI returned invalid recipe format."); } 
-            } 
-            return null; 
+        async function generateRecipe(style, ingredients, preferences) { 
+            console.log("Simulating generateRecipe for:", style);
+            // Return a mock recipe structure for local testing
+            return {
+                recipeName: `AI生成的 ${style}`,
+                calories: 350,
+                ingredients: [
+                    { name: ingredients, quantity: "200克" },
+                    { name: "醬油", quantity: "1湯匙" },
+                    { name: "蔥", quantity: "少許" }
+                ],
+                instructions: [
+                    `將 ${ingredients} 洗淨切好。`,
+                    "熱鍋下油，放入食材翻炒。",
+                    "加入調味料，煮熟即可。"
+                ]
+            };
         }
         
-        // --- Plan A - Image Generation Functions ---
         async function generateImageWithArtDirector(recipeData, originalIngredients) {
-            const artDirectorPrompt = await createVisualPrompt(recipeData.recipeName, originalIngredients);
-            if (!artDirectorPrompt) {
-                console.warn("Art Director failed. Falling back to basic image generation.");
-                const fallbackPrompt = `Professional food photography of a dish named '${recipeData.recipeName}' with main ingredients '${originalIngredients}'.`;
-                return await generateImage(fallbackPrompt);
-            }
-            setLoading(true, translations[currentLanguage].generating_image);
-            return await generateImage(artDirectorPrompt);
-        }
-
-        async function createVisualPrompt(recipeName, ingredients) {
-            const prompt = `Act as a professional food stylist. I will give you a dish name. Your task is to write a single, detailed paragraph in English for an AI image generator. This description should be a visually rich "prompt" that describes the dish's appearance, plating, texture, and common garnishes. Be specific about the cultural context (e.g., Japanese, Thai, Chinese).\n\nDish Name: "${recipeName}"\nMain Ingredients: "${ingredients}"\n\nProvide the detailed English visual description now.`;
-            const payload = { contents: [{ parts: [{ text: prompt }] }] };
-            const result = await makeApiCallWithRetry('gemini', payload);
-            return result?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || null;
-        }
-        
-        async function generateImage(prompt) {
-            const payload = { instances: [{ prompt: prompt }], parameters: { "sampleCount": 1 } };
-            const result = await makeApiCallWithRetry('imagen', payload);
-
-            const base64Data = result?.predictions?.[0]?.bytesBase64Encoded;
-            if (base64Data) {
-                return `data:image/png;base64,${base64Data}`;
-            }
-            return `https://placehold.co/600x400/CCCCCC/FFFFFF?text=Image+Generation+Failed`;
+            console.log("Simulating generateImageWithArtDirector for:", recipeData.recipeName);
+            // Always return a placeholder for local testing to avoid real API calls
+            return `https://placehold.co/600x400/999999/FFFFFF?text=AI+Image+for+${encodeURIComponent(recipeData.recipeName)}`;
         }
 
     </script>
