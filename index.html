@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fridge To Feast (v4.0 Favorites)</title>
+    <title>Fridge To Feast (v4.2 完整优化版)</title>
     
     <!-- Google tag (gtag.js) - Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-RQYJNTJQ1D"></script>
@@ -31,30 +31,105 @@
             background-color: #10B981; color: white; border-color: #10B981;
             box-shadow: 0 2px 6px rgba(16, 185, 129, 0.3);
         }
-        #favorite-btn {
+        .favorite-btn {
             position: absolute; top: 1rem; right: 1rem;
-            background-color: rgba(255, 255, 255, 0.8);
+            background-color: rgba(255, 255, 255, 0.9);
             border-radius: 9999px; width: 2.5rem; height: 2.5rem;
             display: flex; align-items: center; justify-content: center;
-            font-size: 1.25rem; color: #fbbf24; /* amber-400 */
+            font-size: 1.25rem; color: #fbbf24;
             transition: all 0.2s ease-in-out;
+            z-index: 10; cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
-        #favorite-btn:hover { transform: scale(1.1); }
-        #favorite-btn.saved .fa-star { font-weight: 900; } /* solid star */
+        .favorite-btn:hover { 
+            transform: scale(1.1); 
+            background-color: rgba(255, 255, 255, 1);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        .favorite-btn.saved { 
+            background-color: #fbbf24;
+            color: white;
+        }
+        .favorite-btn.saved:hover {
+            background-color: #f59e0b;
+        }
+        
+        /* 加载动画 */
+        .loading-spinner {
+            border: 3px solid #f3f4f6;
+            border-top: 3px solid #10B981;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-right: 8px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* 错误提示样式 */
+        .error-card {
+            background: linear-gradient(135deg, #fef3c7 0%, #fbbf24 100%);
+            border-left: 4px solid #f59e0b;
+        }
+        
+        /* 重试按钮样式 */
+        .retry-btn {
+            background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+            transition: all 0.3s ease;
+        }
+        .retry-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
     </style>
-
 </head>
 <body class="bg-gray-50">
 
     <div class="container mx-auto max-w-2xl p-4 relative pb-24">
         <div class="flex justify-end items-center gap-2 mb-4">
-            <button id="my-favorites-btn" class="text-sm font-semibold text-gray-600 hover:text-green-500 py-2 px-3 bg-white rounded-lg shadow-sm border"><i class="fas fa-star mr-1 text-amber-400"></i><span data-translate="my_favorites">我的最愛</span></button>
+            <button id="my-favorites-btn" class="text-sm font-semibold text-gray-600 hover:text-green-500 py-2 px-3 bg-white rounded-lg shadow-sm border">
+                <i class="fas fa-star mr-1 text-amber-400"></i>
+                <span data-translate="my_favorites">我的最愛</span>
+            </button>
             <button id="lang-switcher" class="text-sm font-semibold text-gray-600 hover:text-green-500 py-2 px-3 bg-white rounded-lg shadow-sm border">English</button>
         </div>
+        
         <header class="text-center my-8">
             <h1 class="text-4xl font-bold text-gray-800" data-translate="main_title">Fridge To Feast</h1>
             <p class="text-gray-500 mt-2" data-translate="subtitle">輸入食材找靈感，或直接搜尋菜名！</p>
+            
+            <!-- 温馨提示 - 放在标题下方 -->
+            <div class="mt-6 mb-4">
+                <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 p-3 rounded-lg shadow-sm">
+                    <div class="flex items-center justify-center">
+                        <div class="flex items-center">
+                            <i class="fas fa-info-circle text-blue-500 text-sm mr-2"></i>
+                            <span class="text-sm text-blue-700 font-medium" data-translate="warm_reminder_title">💡 溫馨提示</span>
+                        </div>
+                    </div>
+                    <div class="mt-2 text-center">
+                        <p class="text-xs text-blue-600" data-translate="warm_reminder_text">本站使用真實 AI 進行食譜生成，並非傳統搜索功能。我們致力於為您創造獨特的烹飪靈感，但 AI 服務器偶爾可能會繁忙，請您見諒。建議將喜愛的食譜收藏起來，方便隨時查看！</p>
+                    </div>
+                    <div class="mt-2 flex justify-center gap-2">
+                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
+                            <i class="fas fa-robot mr-1 text-xs"></i>真實 AI
+                        </span>
+                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">
+                            <i class="fas fa-lightbulb mr-1 text-xs"></i>創意無限
+                        </span>
+                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-700">
+                            <i class="fas fa-heart mr-1 text-xs"></i>用心服務
+                        </span>
+                    </div>
+                </div>
+            </div>
         </header>
+        
         <div class="bg-white p-6 rounded-xl shadow-md">
             <div class="flex items-center border-2 border-gray-200 rounded-lg focus-within:border-green-500 transition-colors">
                 <i class="fas fa-utensils text-gray-400 mx-3"></i>
@@ -82,72 +157,388 @@
         <div class="bg-white p-6 rounded-xl shadow-md">
             <h2 class="text-2xl font-bold text-gray-800 mb-4" data-translate="welcome_title">歡迎來到 Fridge To Feast！</h2>
             <p class="text-gray-600 mb-6" data-translate="welcome_text">再也不用煩惱冰箱裡的食材能做什麼菜。我們利用 AI 為您創造美味食譜，將剩餘食材變成餐桌上的盛宴！</p>
+            
+            <!-- 新增：烹饪小贴士区块 -->
+            <div class="bg-gradient-to-r from-green-50 to-blue-50 p-4 rounded-lg mb-6">
+                <h3 class="text-lg font-semibold text-gray-700 mb-3" data-translate="daily_tips_title">💡 今日烹饪小贴士</h3>
+                <div class="grid md:grid-cols-2 gap-4 text-sm">
+                    <div class="bg-white p-3 rounded-lg shadow-sm">
+                        <h4 class="font-medium text-green-600 mb-1">🥬 食材保存</h4>
+                        <p class="text-gray-600">绿叶蔬菜用湿纸巾包裹后放入保鲜袋，可延长3-5天新鲜度</p>
+                    </div>
+                    <div class="bg-white p-3 rounded-lg shadow-sm">
+                        <h4 class="font-medium text-blue-600 mb-1">🧂 调味技巧</h4>
+                        <p class="text-gray-600">炒菜时盐要分两次放：炒制中期少许，起锅前调味</p>
+                    </div>
+                </div>
+            </div>
+
             <h3 class="text-xl font-semibold text-gray-700 border-b-2 border-green-500 pb-2 mb-4" data-translate="how_to_use_title">如何使用？</h3>
             <ol class="list-decimal list-inside space-y-2 text-gray-600 mb-6">
                 <li data-translate="step1_text">在上面的搜尋框中，輸入您擁有的食材（例如：雞蛋, 番茄, 洋蔥）。</li>
                 <li data-translate="step2_text">選擇您的飲食偏好（例如：素食、要辣）。</li>
                 <li data-translate="step3_text">點擊「開始」，讓我們為您變出魔法！</li>
             </ol>
+
+            <!-- 新增：营养知识区块 -->
+            <div class="bg-yellow-50 p-4 rounded-lg mb-6">
+                <h3 class="text-lg font-semibold text-gray-700 mb-3" data-translate="nutrition_tips_title">🌟 营养搭配小知识</h3>
+                <div class="space-y-2 text-sm text-gray-600">
+                    <p><strong>蛋白质+维生素C：</strong>牛肉配番茄，促进铁质吸收</p>
+                    <p><strong>钙质+维生素D：</strong>豆腐配鱼类，强化骨骼健康</p>
+                    <p><strong>膳食纤维：</strong>每餐至少一种绿叶蔬菜，促进消化</p>
+                </div>
+            </div>
+
             <h3 class="text-xl font-semibold text-gray-700 mb-4" data-translate="popular_searches_title">熱門搜尋</h3>
-            <div id="popular-searches-container" class="flex flex-wrap gap-3">
+            <div id="popular-searches-container" class="flex flex-wrap gap-3 mb-6">
                 <button class="popular-search-btn bg-green-100 text-green-700 py-2 px-4 rounded-full font-semibold" data-search="雞蛋">🍳 雞蛋</button>
                 <button class="popular-search-btn bg-blue-100 text-blue-700 py-2 px-4 rounded-full font-semibold" data-search="雞肉">🍗 雞肉</button>
                 <button class="popular-search-btn bg-red-100 text-red-700 py-2 px-4 rounded-full font-semibold" data-search="番茄">🍅 番茄</button>
                 <button class="popular-search-btn bg-yellow-100 text-yellow-700 py-2 px-4 rounded-full font-semibold" data-search="馬鈴薯">🥔 馬鈴薯</button>
                 <button class="popular-search-btn bg-teal-100 text-teal-700 py-2 px-4 rounded-full font-semibold" data-search="擂茶">🍵 擂茶</button>
+                <button class="popular-search-btn bg-purple-100 text-purple-700 py-2 px-4 rounded-full font-semibold" data-search="豆腐">🧈 豆腐</button>
+            </div>
+
+            <!-- 新增：健康饮食指南 -->
+            <div class="bg-blue-50 p-4 rounded-lg">
+                <h3 class="text-lg font-semibold text-gray-700 mb-3" data-translate="healthy_eating_title">🍽️ 健康饮食指南</h3>
+                <div class="grid md:grid-cols-3 gap-3 text-sm">
+                    <div class="text-center p-2 bg-white rounded">
+                        <div class="text-2xl mb-1">🥗</div>
+                        <div class="font-medium">蔬菜水果</div>
+                        <div class="text-gray-600">每日5份</div>
+                    </div>
+                    <div class="text-center p-2 bg-white rounded">
+                        <div class="text-2xl mb-1">🍗</div>
+                        <div class="font-medium">优质蛋白</div>
+                        <div class="text-gray-600">每餐1份</div>
+                    </div>
+                    <div class="text-center p-2 bg-white rounded">
+                        <div class="text-2xl mb-1">🌾</div>
+                        <div class="font-medium">全谷物</div>
+                        <div class="text-gray-600">替代精制谷物</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 新增：静态内容页面链接 -->
+        <div class="bg-gray-100 p-4 rounded-xl mt-6">
+            <h3 class="text-lg font-semibold text-gray-700 mb-3">📚 更多内容</h3>
+            <div class="grid md:grid-cols-2 gap-3">
+                <a href="#cooking-tips" class="block p-3 bg-white rounded-lg hover:bg-green-50 transition-colors" onclick="showCookingTips()">
+                    <div class="flex items-center">
+                        <span class="text-2xl mr-3">👨‍🍳</span>
+                        <div>
+                            <div class="font-medium">烹饪技巧大全</div>
+                            <div class="text-sm text-gray-600">专业厨师分享的实用技巧</div>
+                        </div>
+                    </div>
+                </a>
+                <a href="#nutrition-guide" class="block p-3 bg-white rounded-lg hover:bg-blue-50 transition-colors" onclick="showNutritionGuide()">
+                    <div class="flex items-center">
+                        <span class="text-2xl mr-3">🥑</span>
+                        <div>
+                            <div class="font-medium">营养搭配指南</div>
+                            <div class="text-sm text-gray-600">科学的营养搭配原则</div>
+                        </div>
+                    </div>
+                </a>
+                <a href="#ingredient-storage" class="block p-3 bg-white rounded-lg hover:bg-yellow-50 transition-colors" onclick="showStorageGuide()">
+                    <div class="flex items-center">
+                        <span class="text-2xl mr-3">🧊</span>
+                        <div>
+                            <div class="font-medium">食材保存秘籍</div>
+                            <div class="text-sm text-gray-600">延长食材新鲜度的方法</div>
+                        </div>
+                    </div>
+                </a>
+                <a href="#seasonal-recipes" class="block p-3 bg-white rounded-lg hover:bg-purple-50 transition-colors" onclick="showSeasonalRecipes()">
+                    <div class="flex items-center">
+                        <span class="text-2xl mr-3">🌸</span>
+                        <div>
+                            <div class="font-medium">时令食谱推荐</div>
+                            <div class="text-sm text-gray-600">根据季节推荐最佳食材</div>
+                        </div>
+                    </div>
+                </a>
             </div>
         </div>
     </template>
+    
     <template id="favorites-view-template">
         <div class="bg-white p-6 rounded-xl shadow-md">
             <h2 class="text-2xl font-bold text-gray-800 mb-4" data-translate="favorites_title">我的最愛食譜</h2>
             <p id="no-favorites-text" class="text-gray-500" data-translate="no_favorites_text">您還沒有收藏任何食譜。看到喜歡的食譜時，點擊右上角的星號就可以收藏起來！</p>
         </div>
     </template>
+    
     <template id="recipe-card-template">
         <div class="bg-white p-6 rounded-xl shadow-lg relative">
-            <button id="favorite-btn" title="加入我的最愛"><i class="far fa-star"></i></button>
-            <div class="relative"><img id="recipe-image" src="" alt="Recipe Image" class="w-full h-64 object-cover rounded-lg mb-4 shadow-md"><div class="absolute bottom-2 right-2 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded" data-translate="image_ref_note">图片只供参考</div></div>
-            <div id="favorite-reminder" class="text-sm text-center text-gray-500 mb-4 italic" data-translate="favorite_reminder">喜歡這道菜？點擊星號收藏，隨時離線查看！</div>
-            <h2 id="recipe-name" class="text-3xl font-bold text-gray-800 mb-2"></h2>
-            <p class="text-gray-600 mb-4"><i class="fas fa-fire-alt mr-2 text-red-500"></i><span data-translate="calories_label">預估卡路里</span>: <span id="recipe-calories"></span> <span class="text-xs text-gray-400" data-translate="calories_note">(估算值)</span></p>
-            <div class="mt-6"><h3 class="text-xl font-semibold text-gray-700 border-b-2 border-green-500 pb-2 mb-4" data-translate="ingredients_label">所需食材</h3><ul id="recipe-ingredients" class="list-disc list-inside space-y-2 text-gray-600"></ul></div>
-            <div class="mt-6"><h3 class="text-xl font-semibold text-gray-700 border-b-2 border-green-500 pb-2 mb-4" data-translate="instructions_label">做法</h3><div id="recipe-instructions" class="space-y-3 text-gray-600 leading-relaxed"></div></div>
+            <button class="favorite-btn" title="加入我的最愛">
+                <i class="far fa-star"></i>
+            </button>
+            <div class="relative">
+                <img class="recipe-image w-full h-64 object-cover rounded-lg mb-4 shadow-md" src="" alt="Recipe Image">
+                <div class="absolute bottom-2 right-2 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded" data-translate="image_ref_note">图片只供参考</div>
+            </div>
+            <div class="favorite-reminder text-sm text-center text-gray-500 mb-4 italic" data-translate="favorite_reminder">喜歡這道菜？點擊星號收藏，隨時離線查看！</div>
+            <h2 class="recipe-name text-3xl font-bold text-gray-800 mb-2"></h2>
+            <p class="text-gray-600 mb-4">
+                <i class="fas fa-fire-alt mr-2 text-red-500"></i>
+                <span data-translate="calories_label">預估卡路里</span>: 
+                <span class="recipe-calories"></span> 
+                <span class="text-xs text-gray-400" data-translate="calories_note">(估算值)</span>
+            </p>
+            <div class="mt-6">
+                <h3 class="text-xl font-semibold text-gray-700 border-b-2 border-green-500 pb-2 mb-4" data-translate="ingredients_label">所需食材</h3>
+                <ul class="recipe-ingredients list-disc list-inside space-y-2 text-gray-600"></ul>
+            </div>
+            <div class="mt-6">
+                <h3 class="text-xl font-semibold text-gray-700 border-b-2 border-green-500 pb-2 mb-4" data-translate="instructions_label">做法</h3>
+                <div class="recipe-instructions space-y-3 text-gray-600 leading-relaxed"></div>
+            </div>
         </div>
     </template>
+    
     <template id="error-message-template">
-         <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded-lg" role="alert">
-            <p class="font-bold" data-translate="error_title_busy">AI 廚師正在忙碌中！</p>
-            <p id="error-text"></p>
-         </div>
+        <div class="error-card p-6 rounded-xl shadow-lg" role="alert">
+            <div class="flex items-center mb-4">
+                <i class="fas fa-exclamation-triangle text-yellow-600 text-2xl mr-3"></i>
+                <h3 class="text-xl font-bold text-gray-800 error-title">AI 廚師正在忙碌中！</h3>
+            </div>
+            <div class="error-content mb-6">
+                <p class="text-gray-700 mb-3 error-text"></p>
+                <div class="bg-white bg-opacity-50 p-4 rounded-lg">
+                    <p class="text-sm text-gray-600 mb-2"><strong>💡 建議解決方案：</strong></p>
+                    <ul class="text-sm text-gray-600 space-y-1">
+                        <li>• 等待 30-60 秒後重試</li>
+                        <li>• 避開使用高峰期（晚餐時間 6-8pm）</li>
+                        <li>• 將喜歡的食譜先收藏起來，避免重新生成</li>
+                        <li>• 嘗試簡化搜索內容</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="flex gap-3">
+                <button class="retry-btn text-white px-6 py-3 rounded-lg font-semibold flex items-center">
+                    <i class="fas fa-redo mr-2"></i>
+                    <span class="retry-text">重試</span>
+                </button>
+                <button class="back-home-btn bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-lg font-semibold transition-colors">
+                    <i class="fas fa-home mr-2"></i>
+                    返回首頁
+                </button>
+            </div>
+        </div>
     </template>
 
     <script>
-        // --- STABILITY: Global Error Handler ---
+        // --- 全域錯誤處理 ---
         window.onerror = function(message, source, lineno, colno, error) {
-            console.error("A global error was caught:", message, error);
+            console.error("全域錯誤:", message, error);
             try {
                 const resultContainer = document.getElementById('result-container');
                 if (resultContainer) {
                     const lang = localStorage.getItem('fridgeToFeastLang') || 'zh';
                     const errorTitle = lang === 'zh' ? '噢不，發生了未知的錯誤！' : 'An unexpected error occurred!';
-                    const errorMessage = lang === 'zh' ? '請稍後再試或重新整理頁面。' : 'Please try again later or refresh the page.';
-                    resultContainer.innerHTML = `<div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-lg" role="alert"><p class="font-bold">${errorTitle}</p><p>${errorMessage}</p></div>`;
+                    const errorMessage = lang === 'zh' ? '請重新整理頁面或稍後再試。' : 'Please refresh the page or try again later.';
+                    displayError(errorMessage, false, errorTitle);
                 }
             } catch (e) {
-                console.error("Could not display global error message:", e);
+                console.error("無法顯示錯誤信息:", e);
             }
             return true;
         };
         
-        // --- I18N ---
+        // --- 翻譯系統 ---
         const translations = {
-            zh: { lang_switcher: "English", main_title: "Fridge To Feast", subtitle: "輸入食材找靈感，或直接搜尋菜名！", input_placeholder: "例如: 雞蛋, 番茄", start_button: "開始", thinking: "思考中...", generating_recipe: "生成食譜中...", generating_image: "繪製圖片中...", art_director: "聘請造型師...", how_to_cook: "你想怎麼煮？", ai_creative_style: "AI創意煮法", image_ref_note: "图片只供参考", calories_label: "預估卡路里", calories_note: "(估算值)", ingredients_label: "所需食材", instructions_label: "做法", error_title: "噢不，出錯了！", error_title_busy: "AI 廚師正在忙碌中！", error_busy_text: "伺服器目前無法回應，請稍後再試。建議將喜歡的食譜收藏起來！", error_input_required: "請輸入食材或菜名！", error_generic: "無法處理您的請求，請稍後再試。", error_recipe_gen: "生成食譜失敗，請稍後再試。", step_label: "步驟", pref_vegetarian: "素食", pref_low_calorie: "低熱量", pref_spicy: "要辣", welcome_title: "歡迎來到 Fridge To Feast！", welcome_text: "再也不用煩惱冰箱裡的食材能做什麼菜。我們利用 AI 為您創造美味食譜，將剩餘食材變成餐桌上的盛宴！", how_to_use_title: "如何使用？", step1_text: "在上面的搜尋框中，輸入您擁有的食材（例如：雞蛋, 番茄, 洋蔥）。", step2_text: "選擇您的飲食偏好（例如：素食、要辣）。", step3_text: "點擊「開始」，讓我們為您變出魔法！", popular_searches_title: "熱門搜尋", my_favorites: "我的最愛", favorites_title: "我的最愛食譜", no_favorites_text: "您還沒有收藏任何食譜。看到喜歡的食譜時，點擊右上角的星號就可以收藏起來！", favorite_reminder: "喜歡這道菜？點擊星號收藏，隨時離線查看！" },
-            en: { lang_switcher: "中文", main_title: "Fridge To Feast", subtitle: "Enter ingredients for ideas, or search for a recipe directly!", input_placeholder: "e.g., egg, tomato", start_button: "Start", thinking: "Thinking...", generating_recipe: "Generating Recipe...", generating_image: "Creating Image...", art_director: "Hiring Art Director...", how_to_cook: "How would you like to cook it?", ai_creative_style: "AI Creative Style", image_ref_note: "Image for reference only", calories_label: "Est. Calories", calories_note: "(approx.)", ingredients_label: "Ingredients", instructions_label: "Instructions", error_title: "Oh no, an error occurred!", error_title_busy: "AI Chef is Busy!", error_busy_text: "The server is currently unavailable. Please try again later. Consider saving recipes you like to your favorites!", error_input_required: "Please enter ingredients or a recipe name!", error_generic: "Could not process your request. Please try again later.", error_recipe_gen: "Failed to generate recipe. Please try again later.", step_label: "Step", pref_vegetarian: "Vegetarian", pref_low_calorie: "Low-Calorie", pref_spicy: "Spicy", welcome_title: "Welcome to Fridge To Feast!", welcome_text: "Stop wondering what to cook with the ingredients in your fridge. We use AI to create delicious recipes, turning your leftovers into a feast!", how_to_use_title: "How to Use?", step1_text: "Enter the ingredients you have in the search bar above (e.g., egg, tomato, onion).", step2_text: "Select your dietary preferences (e.g., Vegetarian, Spicy).", step3_text: "Click 'Start' and let us work our magic!", popular_searches_title: "Popular Searches", my_favorites: "My Favorites", favorites_title: "My Favorite Recipes", no_favorites_text: "You haven't saved any recipes yet. When you find a recipe you like, click the star icon to save it!", favorite_reminder: "Like this recipe? Tap the star to save it for offline access!" }
+            zh: { 
+                lang_switcher: "English", main_title: "Fridge To Feast", subtitle: "輸入食材找靈感，或直接搜尋菜名！", input_placeholder: "例如: 雞蛋, 番茄", start_button: "開始", thinking: "思考中...", generating_recipe: "生成食譜中...", generating_image: "繪製圖片中...", art_director: "聘請造型師...", how_to_cook: "你想怎麼煮？", ai_creative_style: "AI創意煮法", image_ref_note: "图片只供参考", calories_label: "預估卡路里", calories_note: "(估算值)", ingredients_label: "所需食材", instructions_label: "做法", error_title: "噢不，出錯了！", error_title_busy: "AI 廚師正在忙碌中！", error_busy_text: "伺服器目前忙碌中，請稍後重試。建議先將喜歡的食譜收藏起來！", error_input_required: "請輸入食材或菜名！", error_generic: "無法處理您的請求，請稍後再試。", error_recipe_gen: "生成食譜失敗，請稍後再試。", error_timeout: "請求超時，伺服器響應較慢。", error_network: "網路連接問題，請檢查您的網路連接。", step_label: "步驟", pref_vegetarian: "素食", pref_low_calorie: "低熱量", pref_spicy: "要辣", welcome_title: "歡迎來到 Fridge To Feast！", welcome_text: "再也不用煩惱冰箱裡的食材能做什麼菜。我們利用 AI 為您創造美味食譜，將剩餘食材變成餐桌上的盛宴！", how_to_use_title: "如何使用？", step1_text: "在上面的搜尋框中，輸入您擁有的食材（例如：雞蛋, 番茄, 洋蔥）。", step2_text: "選擇您的飲食偏好（例如：素食、要辣）。", step3_text: "點擊「開始」，讓我們為您變出魔法！", popular_searches_title: "熱門搜尋", my_favorites: "我的最愛", favorites_title: "我的最愛食譜", no_favorites_text: "您還沒有收藏任何食譜。看到喜歡的食譜時，點擊右上角的星號就可以收藏起來！", favorite_reminder: "喜歡這道菜？點擊星號收藏，隨時離線查看！", retry_text: "重試", retrying_text: "重試中...", back_home: "返回首頁", warm_reminder_title: "💡 溫馨提示", warm_reminder_text: "本站使用真實 AI 進行食譜生成，並非傳統搜索功能。我們致力於為您創造獨特的烹飪靈感，但 AI 服務器偶爾可能會繁忙，請您見諒。建議將喜愛的食譜收藏起來，方便隨時查看！", daily_tips_title: "💡 今日烹饪小贴士", nutrition_tips_title: "🌟 营养搭配小知识", healthy_eating_title: "🍽️ 健康饮食指南"
+            },
+            en: { 
+                lang_switcher: "中文", main_title: "Fridge To Feast", subtitle: "Enter ingredients for ideas, or search for a recipe directly!", input_placeholder: "e.g., egg, tomato", start_button: "Start", thinking: "Thinking...", generating_recipe: "Generating Recipe...", generating_image: "Creating Image...", art_director: "Hiring Art Director...", how_to_cook: "How would you like to cook it?", ai_creative_style: "AI Creative Style", image_ref_note: "Image for reference only", calories_label: "Est. Calories", calories_note: "(approx.)", ingredients_label: "Ingredients", instructions_label: "Instructions", error_title: "Oh no, an error occurred!", error_title_busy: "AI Chef is Busy!", error_busy_text: "Server is currently busy. Please try again later. Consider saving recipes you like to your favorites!", error_input_required: "Please enter ingredients or a recipe name!", error_generic: "Could not process your request. Please try again later.", error_recipe_gen: "Failed to generate recipe. Please try again later.", error_timeout: "Request timed out, server is responding slowly.", error_network: "Network connection issue, please check your internet connection.", step_label: "Step", pref_vegetarian: "Vegetarian", pref_low_calorie: "Low-Calorie", pref_spicy: "Spicy", welcome_title: "Welcome to Fridge To Feast!", welcome_text: "Stop wondering what to cook with the ingredients in your fridge. We use AI to create delicious recipes, turning your leftovers into a feast!", how_to_use_title: "How to Use?", step1_text: "Enter the ingredients you have in the search bar above (e.g., egg, tomato, onion).", step2_text: "Select your dietary preferences (e.g., Vegetarian, Spicy).", step3_text: "Click 'Start' and let us work our magic!", popular_searches_title: "Popular Searches", my_favorites: "My Favorites", favorites_title: "My Favorite Recipes", no_favorites_text: "You haven't saved any recipes yet. When you find a recipe you like, click the star icon to save it!", favorite_reminder: "Like this recipe? Tap the star to save it for offline access!", retry_text: "Retry", retrying_text: "Retrying...", back_home: "Back to Home", warm_reminder_title: "💡 Friendly Reminder", warm_reminder_text: "This site uses real AI to generate recipes, not traditional search functions. We strive to create unique culinary inspiration for you, but our AI servers may occasionally be busy. Please be patient with us. We recommend saving your favorite recipes for easy access anytime!", daily_tips_title: "💡 Daily Cooking Tips", nutrition_tips_title: "🌟 Nutrition Pairing Knowledge", healthy_eating_title: "🍽️ Healthy Eating Guide"
+            }
         };
         let currentLanguage = localStorage.getItem('fridgeToFeastLang') || 'zh';
         
-        // --- Expert Knowledge Base ---
+        // --- 基础缓存系统 ---
+        class RecipeCache {
+            constructor() {
+                this.cache = new Map();
+                this.maxSize = 50;
+                this.preloadPopularRecipes();
+            }
+
+            set(key, value) {
+                if (this.cache.size >= this.maxSize) {
+                    const firstKey = this.cache.keys().next().value;
+                    this.cache.delete(firstKey);
+                }
+                
+                this.cache.set(key, {
+                    data: value,
+                    timestamp: Date.now(),
+                    hits: 0
+                });
+                
+                try {
+                    localStorage.setItem('recipeCache', JSON.stringify(Array.from(this.cache.entries())));
+                } catch (e) {
+                    console.log('缓存保存失败');
+                }
+            }
+
+            get(key) {
+                const item = this.cache.get(key);
+                if (item) {
+                    item.hits++;
+                    item.lastAccessed = Date.now();
+                    return item.data;
+                }
+                return null;
+            }
+
+            has(key) {
+                return this.cache.has(key);
+            }
+
+            findSimilar(searchTerm) {
+                const searchLower = searchTerm.toLowerCase();
+                for (const [key, value] of this.cache.entries()) {
+                    if (key.toLowerCase().includes(searchLower) || searchLower.includes(key.toLowerCase())) {
+                        value.hits++;
+                        return { key, data: value.data, similarity: 'similar' };
+                    }
+                }
+                return null;
+            }
+
+            async preloadPopularRecipes() {
+                const popularIngredients = ['鸡蛋', '鸡肉', '番茄', '马铃薯', '洋葱', '青菜', '猪肉', '鱼', '豆腐', '面条'];
+                
+                try {
+                    const saved = localStorage.getItem('recipeCache');
+                    if (saved) {
+                        const entries = JSON.parse(saved);
+                        this.cache = new Map(entries);
+                        console.log('已恢复缓存:', this.cache.size, '个食谱');
+                        return;
+                    }
+                } catch (e) {
+                    console.log('缓存恢复失败');
+                }
+
+                console.log('开始预加载热门食谱...');
+                for (const ingredient of popularIngredients.slice(0, 5)) {
+                    if (!this.has(ingredient)) {
+                        try {
+                            const staticRecipe = this.generateStaticRecipe(ingredient);
+                            this.set(ingredient, staticRecipe);
+                            await new Promise(resolve => setTimeout(resolve, 100));
+                        } catch (error) {
+                            console.log(`预加载 ${ingredient} 失败:`, error);
+                        }
+                    }
+                }
+            }
+
+            generateStaticRecipe(ingredient) {
+                const recipes = {
+                    '鸡蛋': {
+                        recipeName: '经典炒鸡蛋',
+                        calories: 155,
+                        ingredients: [
+                            { name: '鸡蛋', quantity: '3个' },
+                            { name: '盐', quantity: '少许' },
+                            { name: '食用油', quantity: '1汤匙' },
+                            { name: '葱花', quantity: '适量' }
+                        ],
+                        instructions: [
+                            '将鸡蛋打散，加入少许盐调味',
+                            '热锅下油，倒入蛋液',
+                            '快速炒制至半熟状态',
+                            '撒上葱花，继续炒至全熟即可'
+                        ]
+                    },
+                    '鸡肉': {
+                        recipeName: '嫩滑鸡肉丝',
+                        calories: 240,
+                        ingredients: [
+                            { name: '鸡胸肉', quantity: '200克' },
+                            { name: '生抽', quantity: '1汤匙' },
+                            { name: '料酒', quantity: '1茶匙' },
+                            { name: '淀粉', quantity: '1茶匙' }
+                        ],
+                        instructions: [
+                            '鸡肉切丝，用生抽、料酒、淀粉腌制15分钟',
+                            '热锅下油，下鸡肉丝炒至变色',
+                            '加入调料炒匀',
+                            '装盘即可享用'
+                        ]
+                    },
+                    '番茄': {
+                        recipeName: '番茄鸡蛋',
+                        calories: 180,
+                        ingredients: [
+                            { name: '番茄', quantity: '2个' },
+                            { name: '鸡蛋', quantity: '3个' },
+                            { name: '糖', quantity: '1茶匙' },
+                            { name: '盐', quantity: '适量' }
+                        ],
+                        instructions: [
+                            '番茄去皮切块，鸡蛋打散',
+                            '先炒鸡蛋盛起',
+                            '炒番茄出汁，加糖和盐',
+                            '倒入鸡蛋炒匀即可'
+                        ]
+                    }
+                };
+
+                return recipes[ingredient] || {
+                    recipeName: `${ingredient}简易料理`,
+                    calories: 200,
+                    ingredients: [
+                        { name: ingredient, quantity: '适量' },
+                        { name: '盐', quantity: '少许' },
+                        { name: '油', quantity: '适量' }
+                    ],
+                    instructions: [
+                        `将${ingredient}清洗干净`,
+                        '根据个人喜好进行调味',
+                        '用适当的烹饪方法制作',
+                        '装盘即可享用'
+                    ]
+                };
+            }
+
+            getStats() {
+                const stats = {
+                    totalItems: this.cache.size,
+                    mostPopular: null,
+                    oldestItem: null
+                };
+
+                let maxHits = 0;
+                let oldestTime = Date.now();
+
+                for (const [key, value] of this.cache.entries()) {
+                    if (value.hits > maxHits) {
+                        maxHits = value.hits;
+                        stats.mostPopular = key;
+                    }
+                    if (value.timestamp < oldestTime) {
+                        oldestTime = value.timestamp;
+                        stats.oldestItem = key;
+                    }
+                }
+
+                return stats;
+            }
+        }
+
+        const recipeCache = new RecipeCache();
+
         const expertRecipes = {
             '擂茶': {
                 zh: { recipeName: "正宗客家擂茶", calories: 450, ingredients: [ { name: "綠茶葉", quantity: "1湯匙" }, { name: "烤花生", quantity: "50克" }, { name: "烤芝麻", quantity: "2湯匙" }, { name: "薄荷葉", quantity: "1小把" }, { name: "九層塔 (金不換)", quantity: "1小把" }, { name: "長豆", quantity: "100克 (切粒)" }, { name: "菜脯 (甜)", quantity: "3湯匙 (切碎)" }, { name: "豆腐乾", quantity: "2塊 (切丁)" }, { name: "蝦米", quantity: "1湯匙 (可選)" }, { name: "樹仔菜", quantity: "1把" }, { name: "白飯", quantity: "2碗" } ], instructions: [ "擂茶醬：將綠茶葉、烤花生、烤芝麻、薄荷葉和九層塔放入擂缽中，用擂棍慢慢研磨成幼滑的糊狀。", "準備配料：分別將長豆、豆腐乾炒熟。菜脯和蝦米（如果使用）也稍微爆香備用。", "沖泡茶湯：將研磨好的擂茶醬取出，加入滾水攪拌均勻，依個人喜好用鹽調味。", "組合：在碗中盛入白飯，鋪上所有準備好的配料。", "享用：將溫熱的擂茶湯淋在飯上，攪拌均勻即可享用。" ] },
@@ -155,7 +546,6 @@
             }
         };
 
-        // --- DOM ELEMENTS ---
         const mainInput = document.getElementById('main-input');
         const startBtn = document.getElementById('start-btn');
         const resultContainer = document.getElementById('result-container');
@@ -163,32 +553,30 @@
         const myFavoritesBtn = document.getElementById('my-favorites-btn');
         const preferencesContainer = document.getElementById('preferences-container');
         const initialContentContainer = document.getElementById('initial-content-container');
-        const templates = { initialContent: document.getElementById('initial-content-template'), favoritesView: document.getElementById('favorites-view-template'), styleSelection: document.getElementById('style-selection-template'), recipeCard: document.getElementById('recipe-card-template'), error: document.getElementById('error-message-template'), };
+        const templates = { 
+            initialContent: document.getElementById('initial-content-template'), 
+            favoritesView: document.getElementById('favorites-view-template'), 
+            recipeCard: document.getElementById('recipe-card-template'), 
+            error: document.getElementById('error-message-template'), 
+        };
 
-        // --- INITIALIZATION ---
-        document.addEventListener('DOMContentLoaded', () => {
-            setLanguage(currentLanguage);
-            showInitialContent();
-            
-            startBtn.addEventListener('click', () => handleInitialInput(mainInput.value));
-            mainInput.addEventListener('keyup', (event) => { if (event.key === 'Enter') handleInitialInput(mainInput.value); });
-            langSwitcherBtn.addEventListener('click', () => { const newLang = currentLanguage === 'zh' ? 'en' : 'zh'; setLanguage(newLang); });
-            myFavoritesBtn.addEventListener('click', showFavorites);
-            
-            preferencesContainer.addEventListener('click', (event) => {
-                if (event.target.classList.contains('preference-btn')) {
-                    event.target.classList.toggle('active');
-                }
-            });
-        });
-        
-        // --- FAVORITES FUNCTIONS ---
         function getFavorites() {
-            return JSON.parse(localStorage.getItem('fridgeToFeastFavorites') || '[]');
+            try {
+                return JSON.parse(localStorage.getItem('fridgeToFeastFavorites') || '[]');
+            } catch (e) {
+                console.error('讀取收藏失敗:', e);
+                return [];
+            }
         }
 
         function saveFavorites(favorites) {
-            localStorage.setItem('fridgeToFeastFavorites', JSON.stringify(favorites));
+            try {
+                localStorage.setItem('fridgeToFeastFavorites', JSON.stringify(favorites));
+                return true;
+            } catch (e) {
+                console.error('保存收藏失敗:', e);
+                return false;
+            }
         }
 
         function isFavorite(recipeName) {
@@ -201,13 +589,21 @@
             const recipeName = recipeData.recipeName;
             const existingIndex = favorites.findIndex(fav => fav.recipeName === recipeName);
 
-            if (existingIndex > -1) { // Already a favorite, so remove it
+            if (existingIndex > -1) {
                 favorites.splice(existingIndex, 1);
-            } else { // Not a favorite, so add it
-                favorites.push({ ...recipeData, imageUrl });
+                console.log('從收藏中移除:', recipeName);
+            } else {
+                favorites.push({ ...recipeData, imageUrl, savedAt: new Date().toISOString() });
+                console.log('添加到收藏:', recipeName);
             }
-            saveFavorites(favorites);
-            return existingIndex === -1; // Return true if it was added, false if removed
+            
+            const saved = saveFavorites(favorites);
+            if (!saved) {
+                alert(currentLanguage === 'zh' ? '收藏功能暫時無法使用' : 'Favorites feature temporarily unavailable');
+                return existingIndex === -1;
+            }
+            
+            return existingIndex === -1;
         }
 
         function showFavorites() {
@@ -225,33 +621,270 @@
             } else {
                 noFavsText.style.display = 'none';
                 favorites.forEach(fav => {
-                    displayRecipe(fav, fav.imageUrl, true); // Pass a flag to indicate it's a favorite view
+                    displayRecipe(fav, fav.imageUrl, true);
                 });
             }
-            setLanguage(currentLanguage); // Re-apply translations
+            setLanguage(currentLanguage);
         }
 
-
-        // --- LANGUAGE FUNCTIONS ---
         function setLanguage(lang) {
             currentLanguage = lang;
             localStorage.setItem('fridgeToFeastLang', lang);
             document.documentElement.lang = lang;
             document.querySelectorAll('[data-translate]').forEach(el => {
                 const key = el.getAttribute('data-translate');
-                if (translations[lang][key]) { el.textContent = translations[lang][key]; }
+                if (translations[lang][key]) { 
+                    el.textContent = translations[lang][key]; 
+                }
             });
             langSwitcherBtn.textContent = translations[lang].lang_switcher;
             mainInput.placeholder = translations[lang].input_placeholder;
         }
 
-        // --- HELPER FUNCTIONS ---
         function getSelectedPreferences() {
             const activeButtons = preferencesContainer.querySelectorAll('.preference-btn.active');
             return Array.from(activeButtons).map(btn => btn.dataset.preference);
         }
 
-        // --- MAIN LOGIC ---
+        function showLoadingStates() {
+            const loadingStates = [
+                translations[currentLanguage].thinking,
+                translations[currentLanguage].generating_recipe,
+                translations[currentLanguage].art_director,
+                translations[currentLanguage].generating_image
+            ];
+            
+            let currentStateIndex = 0;
+            
+            const updateLoadingText = () => {
+                const span = startBtn.querySelector('span');
+                if (span && startBtn.disabled) {
+                    span.textContent = loadingStates[currentStateIndex % loadingStates.length];
+                    currentStateIndex++;
+                }
+            };
+            
+            updateLoadingText();
+            const interval = setInterval(() => {
+                if (!startBtn.disabled) {
+                    clearInterval(interval);
+                    return;
+                }
+                updateLoadingText();
+            }, 3000);
+            
+            return interval;
+        }
+
+        async function makeApiCallWithRetry(targetApi, payload, maxRetries = 3) {
+            let lastError = null;
+            
+            for (let attempt = 1; attempt <= maxRetries; attempt++) {
+                try {
+                    console.log(`API調用嘗試 ${attempt}/${maxRetries}`);
+                    
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 30000);
+                    
+                    const response = await fetch('/api/generate', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            targetApi: targetApi,
+                            payload: payload
+                        }),
+                        signal: controller.signal
+                    });
+
+                    clearTimeout(timeoutId);
+
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        console.error(`API響應錯誤 ${response.status}:`, errorText);
+                        
+                        if (response.status === 503 || response.status === 429) {
+                            throw new Error(`SERVER_BUSY_${response.status}`);
+                        } else if (response.status >= 500) {
+                            throw new Error(`SERVER_ERROR_${response.status}`);
+                        } else {
+                            throw new Error(`API_ERROR_${response.status}`);
+                        }
+                    }
+                    
+                    const result = await response.json();
+                    console.log(`API調用成功，嘗試 ${attempt}`);
+                    return result;
+                    
+                } catch (error) {
+                    console.error(`API調用嘗試 ${attempt} 失敗:`, error);
+                    lastError = error;
+                    
+                    if (error.name === 'AbortError') {
+                        lastError = new Error('TIMEOUT_ERROR');
+                    }
+                    
+                    if (attempt < maxRetries) {
+                        const waitTime = Math.min(2000 * Math.pow(2, attempt - 1), 10000);
+                        console.log(`等待 ${waitTime}ms 後重試...`);
+                        await new Promise(resolve => setTimeout(resolve, waitTime));
+                    }
+                }
+            }
+            
+            console.error('所有重試都失敗了');
+            throw lastError;
+        }
+
+        function getErrorMessage(error) {
+            const errorStr = error.toString();
+            console.log('錯誤類型:', errorStr);
+            
+            if (errorStr.includes('SERVER_BUSY') || errorStr.includes('503')) {
+                return {
+                    title: translations[currentLanguage].error_title_busy,
+                    message: translations[currentLanguage].error_busy_text,
+                    isBusy: true
+                };
+            } else if (errorStr.includes('TIMEOUT')) {
+                return {
+                    title: translations[currentLanguage].error_title_busy,
+                    message: translations[currentLanguage].error_timeout,
+                    isBusy: true
+                };
+            } else if (errorStr.includes('NetworkError') || errorStr.includes('fetch')) {
+                return {
+                    title: translations[currentLanguage].error_title,
+                    message: translations[currentLanguage].error_network,
+                    isBusy: false
+                };
+            } else {
+                return {
+                    title: translations[currentLanguage].error_title,
+                    message: error.message || translations[currentLanguage].error_generic,
+                    isBusy: false
+                };
+            }
+        }
+
+        function displayError(message, isBusy = false, customTitle = null) { 
+            resultContainer.innerHTML = ''; 
+            const errorCard = templates.error.content.cloneNode(true); 
+            
+            const titleElement = errorCard.querySelector('.error-title');
+            const textElement = errorCard.querySelector('.error-text');
+            const retryBtn = errorCard.querySelector('.retry-btn');
+            const retryText = errorCard.querySelector('.retry-text');
+            const backBtn = errorCard.querySelector('.back-home-btn');
+            
+            if (customTitle) {
+                titleElement.textContent = customTitle;
+            } else if (isBusy) {
+                titleElement.textContent = translations[currentLanguage].error_title_busy;
+            } else {
+                titleElement.textContent = translations[currentLanguage].error_title;
+            }
+            
+            textElement.textContent = message;
+            retryText.textContent = translations[currentLanguage].retry_text;
+            
+            retryBtn.addEventListener('click', () => {
+                const lastInput = mainInput.value.trim();
+                if (lastInput) {
+                    retryText.innerHTML = `<div class="loading-spinner"></div>${translations[currentLanguage].retrying_text}`;
+                    retryBtn.disabled = true;
+                    setTimeout(() => {
+                        handleInitialInput(lastInput);
+                    }, 1000);
+                }
+            });
+            
+            backBtn.addEventListener('click', () => {
+                showInitialContent();
+            });
+            
+            resultContainer.appendChild(errorCard); 
+        }
+
+        function setLoading(isLoading, message) { 
+            startBtn.disabled = isLoading; 
+            const span = startBtn.querySelector('span');
+            const icon = startBtn.querySelector('i');
+            
+            if (isLoading) {
+                if (span) span.innerHTML = `<div class="loading-spinner"></div>${message}`;
+                if (icon) icon.style.display = 'none';
+                showLoadingStates();
+            } else {
+                if (span) span.textContent = translations[currentLanguage].start_button;
+                if (icon) {
+                    icon.style.display = 'inline';
+                    icon.className = 'fas fa-search mr-2';
+                }
+            }
+            
+            if (isLoading && message === translations[currentLanguage].thinking) { 
+                resultContainer.innerHTML = ''; 
+            } 
+        }
+
+        async function checkCacheFirst(userInput) {
+            const inputLower = userInput.toLowerCase();
+            
+            if (recipeCache.has(inputLower)) {
+                return {
+                    data: recipeCache.get(inputLower),
+                    source: 'exact',
+                    imageUrl: 'https://placehold.co/600x400/10B981/FFFFFF?text=Cached+Recipe'
+                };
+            }
+
+            const similarResult = recipeCache.findSimilar(inputLower);
+            if (similarResult) {
+                return {
+                    data: similarResult.data,
+                    source: 'similar',
+                    imageUrl: 'https://placehold.co/600x400/F59E0B/FFFFFF?text=Similar+Recipe'
+                };
+            }
+
+            const popularIngredients = ['鸡蛋', '鸡肉', '番茄', '马铃薯', '洋葱'];
+            for (const ingredient of popularIngredients) {
+                if (inputLower.includes(ingredient) && recipeCache.has(ingredient)) {
+                    return {
+                        data: recipeCache.get(ingredient),
+                        source: 'ingredient_match',
+                        imageUrl: 'https://placehold.co/600x400/8B5CF6/FFFFFF?text=Ingredient+Match'
+                    };
+                }
+            }
+
+            return null;
+        }
+
+        async function getFallbackFromCache(userInput) {
+            const cache = recipeCache.cache;
+            if (cache.size > 0) {
+                let mostPopular = null;
+                let maxHits = 0;
+                
+                for (const [key, value] of cache.entries()) {
+                    if (value.hits > maxHits) {
+                        maxHits = value.hits;
+                        mostPopular = value.data;
+                    }
+                }
+
+                if (mostPopular) {
+                    return {
+                        data: mostPopular,
+                        source: 'fallback',
+                        imageUrl: 'https://placehold.co/600x400/EF4444/FFFFFF?text=Popular+Recipe'
+                    };
+                }
+            }
+            return null;
+        }
+
         async function handleInitialInput(userInput) {
             const trimmedInput = userInput.trim();
             if (!trimmedInput) {
@@ -261,6 +894,17 @@
 
             initialContentContainer.style.display = 'none';
             resultContainer.innerHTML = ''; 
+
+            const cacheResult = await checkCacheFirst(trimmedInput);
+            if (cacheResult) {
+                console.log('使用缓存结果:', cacheResult.source);
+                displayRecipe(cacheResult.data, cacheResult.imageUrl || 'https://placehold.co/600x400/10B981/FFFFFF?text=Cached+Recipe', false);
+                if (cacheResult.source === 'similar') {
+                    showToast('为您推荐相似食谱 🔥');
+                }
+                return;
+            }
+
             setLoading(true, translations[currentLanguage].thinking);
 
             try {
@@ -281,10 +925,16 @@
                     displayCookingStyles(styles, trimmedInput, preferences);
                 }
             } catch (error) {
-                console.error("Critical Error in Main Flow:", error);
-                const isServerError = error.message && error.message.includes('503');
-                const errorMessage = isServerError ? translations[currentLanguage].error_busy_text : (error.message || translations[currentLanguage].error_generic);
-                displayError(errorMessage, isServerError);
+                console.error("主要流程錯誤:", error);
+                
+                const fallbackResult = await getFallbackFromCache(trimmedInput);
+                if (fallbackResult) {
+                    displayRecipe(fallbackResult.data, fallbackResult.imageUrl || 'https://placehold.co/600x400/10B981/FFFFFF?text=Fallback+Recipe', false);
+                    showToast('服务繁忙，为您推荐相关食谱 💫');
+                } else {
+                    const errorInfo = getErrorMessage(error);
+                    displayError(errorInfo.message, errorInfo.isBusy, errorInfo.title);
+                }
                 setLoading(false);
             }
         }
@@ -298,186 +948,34 @@
                     setLoading(true, translations[currentLanguage].generating_recipe);
                     recipeData = await generateRecipe(style, ingredients, preferences);
                     if (!recipeData) throw new Error(translations[currentLanguage].error_recipe_gen);
+                    
+                    const cacheKey = (style || ingredients).toLowerCase();
+                    recipeCache.set(cacheKey, recipeData);
                 }
                 
                 setLoading(true, translations[currentLanguage].art_director);
                 const imagePromptIngredients = preloadedRecipe ? recipeData.recipeName : ingredients;
                 const imageUrl = await generateImageWithArtDirector(recipeData, imagePromptIngredients);
                 
-                // Clear container before displaying the single recipe
                 resultContainer.innerHTML = '';
                 displayRecipe(recipeData, imageUrl, false);
 
             } catch (error) {
-                console.error("Error in generateFinalRecipe:", error);
-                const isServerError = error.message && error.message.includes('503');
-                const errorMessage = isServerError ? translations[currentLanguage].error_busy_text : (error.message || translations[currentLanguage].error_generic);
-                displayError(errorMessage, isServerError);
+                console.error("生成食譜錯誤:", error);
+                
+                const fallbackResult = await getFallbackFromCache(ingredients);
+                if (fallbackResult) {
+                    displayRecipe(fallbackResult.data, fallbackResult.imageUrl, false);
+                    showToast('AI繁忙中，为您推荐热门食谱 🌟');
+                } else {
+                    const errorInfo = getErrorMessage(error);
+                    displayError(errorInfo.message, errorInfo.isBusy, errorInfo.title);
+                }
             } finally {
                 setLoading(false);
             }
         }
 
-        // --- UI DISPLAY ---
-        function showInitialContent() {
-            resultContainer.innerHTML = ''; // Clear results
-            const content = templates.initialContent.content.cloneNode(true);
-            initialContentContainer.innerHTML = ''; // Clear previous initial content
-            initialContentContainer.appendChild(content);
-            initialContentContainer.style.display = 'block';
-
-            // Re-attach listener for popular searches
-            const popSearchContainer = initialContentContainer.querySelector('#popular-searches-container');
-            if(popSearchContainer) {
-                popSearchContainer.addEventListener('click', (event) => {
-                    if (event.target.matches('.popular-search-btn')) {
-                        const searchTerm = event.target.getAttribute('data-search');
-                        mainInput.value = searchTerm;
-                        handleInitialInput(searchTerm);
-                    }
-                });
-            }
-            setLanguage(currentLanguage);
-        }
-
-        function setLoading(isLoading, message) { 
-            startBtn.disabled = isLoading; 
-            const span = startBtn.querySelector('span');
-            if(span) {
-                span.textContent = isLoading ? message : translations[currentLanguage].start_button;
-            }
-            if (isLoading && message === translations[currentLanguage].thinking) { 
-                resultContainer.innerHTML = ''; 
-            } 
-        }
-
-        function displayError(message, isBusy = false) { 
-            resultContainer.innerHTML = ''; 
-            const errorCard = templates.error.content.cloneNode(true); 
-            if (isBusy) {
-                errorCard.querySelector('.font-bold').textContent = translations[currentLanguage].error_title_busy;
-            } else {
-                 errorCard.querySelector('.font-bold').textContent = translations[currentLanguage].error_title;
-            }
-            errorCard.getElementById('error-text').textContent = message; 
-            resultContainer.appendChild(errorCard); 
-        }
-
-        function displayCookingStyles(styles, ingredients, preferences) {
-            resultContainer.innerHTML = ''; 
-            const styleCard = templates.styleSelection.content.cloneNode(true); 
-            const container = styleCard.getElementById('style-buttons-container'); 
-            styleCard.querySelector('[data-translate="how_to_cook"]').textContent = translations[currentLanguage].how_to_cook; 
-            styles.forEach(style => { 
-                const button = document.createElement('button'); 
-                button.textContent = style; 
-                button.className = 'style-btn w-full bg-white p-4 rounded-lg shadow border-2 border-gray-200 hover:border-green-500 hover:text-green-600 font-semibold'; 
-                if (style === translations['zh'].ai_creative_style || style === translations['en'].ai_creative_style) { 
-                    button.classList.add('bg-green-100', 'text-green-700'); 
-                } 
-                button.onclick = () => { 
-                    resultContainer.innerHTML = `<div class="bg-white p-6 rounded-xl shadow-md"><div class="bg-gray-200 h-64 w-full rounded-lg animate-pulse"></div><div class="h-8 bg-gray-200 rounded w-3/4 mt-6 animate-pulse"></div></div>`; 
-                    generateFinalRecipe(style, ingredients, preferences);
-                }; 
-                container.appendChild(button); 
-            }); 
-            resultContainer.appendChild(styleCard); 
-            setLoading(false); 
-        }
-
-        function displayRecipe(data, imageUrl, isFavoriteView = false) { 
-            const cardFragment = templates.recipeCard.content.cloneNode(true);
-            const card = cardFragment.firstElementChild;
-            
-            // --- Translate and Populate ---
-            const elementsToTranslate = card.querySelectorAll('[data-translate]'); 
-            elementsToTranslate.forEach(el => { 
-                const key = el.getAttribute('data-translate'); 
-                if (translations[currentLanguage][key]) { el.textContent = translations[currentLanguage][key]; } 
-            }); 
-            card.querySelector('#recipe-image').src = imageUrl;
-            card.querySelector('#recipe-image').alt = `Image of ${data.recipeName}`; 
-            card.querySelector('#recipe-name').textContent = data.recipeName; 
-            card.querySelector('#recipe-calories').textContent = data.calories; 
-            const ingredientsList = card.querySelector('#recipe-ingredients'); 
-            ingredientsList.innerHTML = ''; 
-            data.ingredients.forEach(item => { const li = document.createElement('li'); li.textContent = `${item.name} - ${item.quantity}`; ingredientsList.appendChild(li); }); 
-            const instructionsDiv = card.querySelector('#recipe-instructions'); 
-            instructionsDiv.innerHTML = ''; 
-            data.instructions.forEach((step, index) => { const p = document.createElement('p'); p.innerHTML = `<strong class="text-green-600">${translations[currentLanguage].step_label} ${index + 1}:</strong> ${step}`; instructionsDiv.appendChild(p); }); 
-
-            // --- Favorite Button Logic ---
-            const favBtn = card.querySelector('#favorite-btn');
-            const favReminder = card.querySelector('#favorite-reminder');
-
-            function updateFavButtonState() {
-                if (isFavorite(data.recipeName)) {
-                    favBtn.classList.add('saved');
-                    favBtn.title = "從我的最愛中移除";
-                } else {
-                    favBtn.classList.remove('saved');
-                    favBtn.title = "加入我的最愛";
-                }
-            }
-            
-            updateFavButtonState();
-
-            favBtn.onclick = () => {
-                const added = toggleFavorite(data, imageUrl);
-                updateFavButtonState();
-                // If in favorites view and item is removed, remove the card from the DOM
-                if (isFavoriteView && !added) {
-                    card.style.transition = 'opacity 0.3s ease';
-                    card.style.opacity = '0';
-                    setTimeout(() => { 
-                        card.remove();
-                        // Check if no favorites are left
-                        if (getFavorites().length === 0) {
-                            const noFavsText = document.querySelector('#no-favorites-text');
-                            if(noFavsText) noFavsText.style.display = 'block';
-                        }
-                    }, 300);
-                }
-            };
-
-            // Hide reminder if it's from the favorites view
-            if (isFavoriteView) {
-                favReminder.style.display = 'none';
-            }
-
-            resultContainer.appendChild(card); 
-        }
-        
-        // --- API HELPERS (REAL, PRODUCTION VERSION) ---
-        async function makeApiCallWithRetry(targetApi, payload, maxRetries = 3) {
-            let attempt = 0;
-            while (attempt < maxRetries) {
-                try {
-                    const response = await fetch('/api/generate', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            targetApi: targetApi,
-                            payload: payload
-                        })
-                    });
-
-                    if (!response.ok) {
-                        throw new Error(`API_ERROR_${response.status}`);
-                    }
-                    return await response.json();
-                } catch (error) {
-                    attempt++;
-                    console.error(`API call attempt ${attempt} failed. Retrying...`, error);
-                    if (attempt >= maxRetries) {
-                        console.error("API call failed after max retries.");
-                        throw error;
-                    };
-                    await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 1000));
-                }
-            }
-        }
-        
         async function determineInputType(userInput) { 
             const prompt = `Analyze the following text and determine if it's a 'list of ingredients' or a 'recipe name'. Text: "${userInput}". Respond with only "ingredients" or "recipe_name".`; 
             const payload = { contents: [{ parts: [{ text: prompt }] }] }; 
@@ -537,7 +1035,7 @@
             const result = await makeApiCallWithRetry('gemini', payload); 
             const text = result?.candidates?.[0]?.content?.parts?.[0]?.text; 
             if (text) { 
-                try { return JSON.parse(text); } catch(e) { console.error("Failed to parse recipe JSON:", text, e); throw new Error("AI returned invalid recipe format."); } 
+                try { return JSON.parse(text); } catch(e) { console.error("解析食譜JSON失敗:", text, e); throw new Error("AI返回了無效的食譜格式。"); } 
             } 
             return null; 
         }
@@ -545,7 +1043,7 @@
         async function generateImageWithArtDirector(recipeData, originalIngredients) {
             const artDirectorPrompt = await createVisualPrompt(recipeData.recipeName, originalIngredients);
             if (!artDirectorPrompt) {
-                console.warn("Art Director failed. Falling back to basic image generation.");
+                console.warn("Art Director失敗，使用基本圖片生成。");
                 const fallbackPrompt = `Professional food photography of a dish named '${recipeData.recipeName}' with main ingredients '${originalIngredients}'.`;
                 return await generateImage(fallbackPrompt);
             }
@@ -570,6 +1068,289 @@
             }
             return `https://placehold.co/600x400/CCCCCC/FFFFFF?text=Image+Generation+Failed`;
         }
+
+        function showInitialContent() {
+            resultContainer.innerHTML = '';
+            const content = templates.initialContent.content.cloneNode(true);
+            initialContentContainer.innerHTML = '';
+            initialContentContainer.appendChild(content);
+            initialContentContainer.style.display = 'block';
+
+            const popSearchContainer = initialContentContainer.querySelector('#popular-searches-container');
+            if(popSearchContainer) {
+                popSearchContainer.addEventListener('click', (event) => {
+                    if (event.target.matches('.popular-search-btn')) {
+                        const searchTerm = event.target.getAttribute('data-search');
+                        mainInput.value = searchTerm;
+                        handleInitialInput(searchTerm);
+                    }
+                });
+            }
+            setLanguage(currentLanguage);
+        }
+
+        function displayCookingStyles(styles, ingredients, preferences) {
+            resultContainer.innerHTML = ''; 
+            
+            const styleCard = document.createElement('div');
+            styleCard.className = 'bg-white p-6 rounded-xl shadow-md';
+            styleCard.innerHTML = `
+                <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center" data-translate="how_to_cook">${translations[currentLanguage].how_to_cook}</h2>
+                <div id="style-buttons-container" class="space-y-4"></div>
+            `;
+            
+            const container = styleCard.querySelector('#style-buttons-container'); 
+            styles.forEach(style => { 
+                const button = document.createElement('button'); 
+                button.textContent = style; 
+                button.className = 'style-btn w-full bg-white p-4 rounded-lg shadow border-2 border-gray-200 hover:border-green-500 hover:text-green-600 font-semibold transition-all'; 
+                if (style === translations['zh'].ai_creative_style || style === translations['en'].ai_creative_style) { 
+                    button.classList.add('bg-green-100', 'text-green-700'); 
+                } 
+                button.onclick = () => { 
+                    resultContainer.innerHTML = `<div class="bg-white p-6 rounded-xl shadow-md"><div class="bg-gray-200 h-64 w-full rounded-lg animate-pulse"></div><div class="h-8 bg-gray-200 rounded w-3/4 mt-6 animate-pulse"></div></div>`; 
+                    generateFinalRecipe(style, ingredients, preferences);
+                }; 
+                container.appendChild(button); 
+            }); 
+            resultContainer.appendChild(styleCard); 
+            setLoading(false); 
+        }
+
+        function displayRecipe(data, imageUrl, isFavoriteView = false) { 
+            const cardFragment = templates.recipeCard.content.cloneNode(true);
+            const card = cardFragment.firstElementChild;
+            
+            const elementsToTranslate = card.querySelectorAll('[data-translate]'); 
+            elementsToTranslate.forEach(el => { 
+                const key = el.getAttribute('data-translate'); 
+                if (translations[currentLanguage][key]) { 
+                    el.textContent = translations[currentLanguage][key]; 
+                } 
+            }); 
+            
+            card.querySelector('.recipe-image').src = imageUrl;
+            card.querySelector('.recipe-image').alt = `Image of ${data.recipeName}`; 
+            card.querySelector('.recipe-name').textContent = data.recipeName; 
+            card.querySelector('.recipe-calories').textContent = data.calories; 
+            
+            const ingredientsList = card.querySelector('.recipe-ingredients'); 
+            ingredientsList.innerHTML = ''; 
+            data.ingredients.forEach(item => { 
+                const li = document.createElement('li'); 
+                li.textContent = `${item.name} - ${item.quantity}`; 
+                ingredientsList.appendChild(li); 
+            }); 
+            
+            const instructionsDiv = card.querySelector('.recipe-instructions'); 
+            instructionsDiv.innerHTML = ''; 
+            data.instructions.forEach((step, index) => { 
+                const p = document.createElement('p'); 
+                p.innerHTML = `<strong class="text-green-600">${translations[currentLanguage].step_label} ${index + 1}:</strong> ${step}`; 
+                instructionsDiv.appendChild(p); 
+            }); 
+
+            const favBtn = card.querySelector('.favorite-btn');
+            const favReminder = card.querySelector('.favorite-reminder');
+
+            function updateFavButtonState() {
+                const icon = favBtn.querySelector('i');
+                if (isFavorite(data.recipeName)) {
+                    favBtn.classList.add('saved');
+                    icon.className = 'fas fa-star';
+                    favBtn.title = currentLanguage === 'zh' ? "從我的最愛中移除" : "Remove from favorites";
+                } else {
+                    favBtn.classList.remove('saved');
+                    icon.className = 'far fa-star';
+                    favBtn.title = currentLanguage === 'zh' ? "加入我的最愛" : "Add to favorites";
+                }
+            }
+            
+            updateFavButtonState();
+
+            favBtn.onclick = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const wasAdded = toggleFavorite(data, imageUrl);
+                updateFavButtonState();
+                
+                if (isFavoriteView && !wasAdded) {
+                    card.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+                    card.style.opacity = '0';
+                    card.style.transform = 'translateY(-20px)';
+                    setTimeout(() => { 
+                        card.remove();
+                        if (getFavorites().length === 0) {
+                            const noFavsText = document.querySelector('#no-favorites-text');
+                            if(noFavsText) noFavsText.style.display = 'block';
+                        }
+                    }, 300);
+                }
+                
+                const feedbackMsg = wasAdded 
+                    ? (currentLanguage === 'zh' ? '已加入收藏！' : 'Added to favorites!')
+                    : (currentLanguage === 'zh' ? '已從收藏移除' : 'Removed from favorites');
+                    
+                showToast(feedbackMsg);
+            };
+
+            if (isFavoriteView) {
+                favReminder.style.display = 'none';
+            }
+
+            resultContainer.appendChild(card); 
+        }
+
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 transition-all transform translate-x-full';
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.classList.remove('translate-x-full');
+            }, 100);
+            
+            setTimeout(() => {
+                toast.classList.add('translate-x-full');
+                setTimeout(() => toast.remove(), 300);
+            }, 2000);
+        }
+
+        function showCookingTips() {
+            initialContentContainer.style.display = 'none';
+            resultContainer.innerHTML = `
+                <div class="bg-white p-6 rounded-xl shadow-lg">
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="text-3xl font-bold text-gray-800">👨‍🍳 烹饪技巧大全</h2>
+                        <button onclick="showInitialContent()" class="text-green-500 hover:text-green-600 font-medium">
+                            <i class="fas fa-arrow-left mr-2"></i>返回首页
+                        </button>
+                    </div>
+                    
+                    <div class="space-y-6">
+                        <section class="border-l-4 border-green-500 pl-4">
+                            <h3 class="text-xl font-semibold mb-3">🔥 火候控制技巧</h3>
+                            <ul class="space-y-2 text-gray-700">
+                                <li><strong>大火爆炒：</strong>适合绿叶蔬菜，保持脆嫩口感和鲜艳颜色</li>
+                                <li><strong>中火煎炸：</strong>鱼类、肉类外焦内嫩的关键</li>
+                                <li><strong>小火慢炖：</strong>汤品、炖菜入味的秘诀</li>
+                                <li><strong>余温利用：</strong>关火后用余温焖煮，节能又美味</li>
+                            </ul>
+                        </section>
+
+                        <section class="border-l-4 border-blue-500 pl-4">
+                            <h3 class="text-xl font-semibold mb-3">🧂 调味黄金比例</h3>
+                            <div class="bg-blue-50 p-4 rounded-lg">
+                                <ul class="space-y-2 text-gray-700">
+                                    <li><strong>糖醋比例：</strong>糖1：醋2，酸甜适中</li>
+                                    <li><strong>腌制肉类：</strong>盐1%，糖0.5%，料酒10%</li>
+                                    <li><strong>炒菜用盐：</strong>500g菜品用盐3-5g</li>
+                                    <li><strong>汤品调味：</strong>先淡后浓，逐步调整</li>
+                                </ul>
+                            </div>
+                        </section>
+                    </div>
+                </div>
+            `;
+        }
+
+        function showNutritionGuide() {
+            initialContentContainer.style.display = 'none';
+            resultContainer.innerHTML = `
+                <div class="bg-white p-6 rounded-xl shadow-lg">
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="text-3xl font-bold text-gray-800">🥑 营养搭配指南</h2>
+                        <button onclick="showInitialContent()" class="text-green-500 hover:text-green-600 font-medium">
+                            <i class="fas fa-arrow-left mr-2"></i>返回首页
+                        </button>
+                    </div>
+                    
+                    <div class="space-y-6">
+                        <section class="border-l-4 border-green-500 pl-4">
+                            <h3 class="text-xl font-semibold mb-3">🌈 彩虹饮食法</h3>
+                            <p class="text-gray-600">每天摄入不同颜色的蔬果，确保营养素的全面性</p>
+                        </section>
+                    </div>
+                </div>
+            `;
+        }
+
+        function showStorageGuide() {
+            initialContentContainer.style.display = 'none';
+            resultContainer.innerHTML = `
+                <div class="bg-white p-6 rounded-xl shadow-lg">
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="text-3xl font-bold text-gray-800">🧊 食材保存秘籍</h2>
+                        <button onclick="showInitialContent()" class="text-green-500 hover:text-green-600 font-medium">
+                            <i class="fas fa-arrow-left mr-2"></i>返回首页
+                        </button>
+                    </div>
+                    
+                    <div class="space-y-6">
+                        <section class="border-l-4 border-green-500 pl-4">
+                            <h3 class="text-xl font-semibold mb-3">🥬 蔬菜保存技巧</h3>
+                            <p class="text-gray-600">科学的保存方法，延长食材新鲜度</p>
+                        </section>
+                    </div>
+                </div>
+            `;
+        }
+
+        function showSeasonalRecipes() {
+            initialContentContainer.style.display = 'none';
+            resultContainer.innerHTML = `
+                <div class="bg-white p-6 rounded-xl shadow-lg">
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="text-3xl font-bold text-gray-800">🌸 时令食谱推荐</h2>
+                        <button onclick="showInitialContent()" class="text-green-500 hover:text-green-600 font-medium">
+                            <i class="fas fa-arrow-left mr-2"></i>返回首页
+                        </button>
+                    </div>
+                    
+                    <div class="space-y-6">
+                        <section class="border-l-4 border-pink-500 pl-4">
+                            <h3 class="text-xl font-semibold mb-3">🌸 春季时令</h3>
+                            <p class="text-gray-600">根据季节推荐最佳食材和菜品</p>
+                        </section>
+                    </div>
+                </div>
+            `;
+        }
+
+        function searchSeasonal(term) {
+            mainInput.value = term;
+            handleInitialInput(term);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            setLanguage(currentLanguage);
+            showInitialContent();
+            
+            recipeCache.preloadPopularRecipes();
+            
+            startBtn.addEventListener('click', () => handleInitialInput(mainInput.value));
+            mainInput.addEventListener('keyup', (event) => { 
+                if (event.key === 'Enter') handleInitialInput(mainInput.value); 
+            });
+            langSwitcherBtn.addEventListener('click', () => { 
+                const newLang = currentLanguage === 'zh' ? 'en' : 'zh'; 
+                setLanguage(newLang); 
+            });
+            myFavoritesBtn.addEventListener('click', showFavorites);
+            
+            preferencesContainer.addEventListener('click', (event) => {
+                if (event.target.classList.contains('preference-btn')) {
+                    event.target.classList.toggle('active');
+                }
+            });
+
+            setTimeout(() => {
+                const stats = recipeCache.getStats();
+                console.log('缓存统计:', stats);
+            }, 2000);
+        });
 
     </script>
 </body>
