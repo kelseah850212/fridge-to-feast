@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fridge To Feast (v5.0 附法律條款)</title>
+    <title>Fridge To Feast (v5.1 附PWA提示)</title>
     
     <!-- Google tag (gtag.js) - Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-RQYJNTJQ1D"></script>
@@ -99,9 +99,27 @@
             transform: scale(0.95); transition: transform 0.3s ease;
         }
         .modal-overlay.active .modal-content { transform: scale(1); }
+        
+        /* PWA 安装提示样式 */
+        #install-hint {
+            animation: fadeInOut 15s ease-in-out forwards;
+        }
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: translateY(-20px); }
+            10% { opacity: 1; transform: translateY(0); }
+            90% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(-20px); }
+        }
     </style>
 </head>
 <body class="bg-gray-50">
+
+    <!-- PWA 安装提示 -->
+    <div id="install-hint" class="hidden fixed top-20 right-4 bg-blue-500 text-white text-xs px-3 py-2 rounded-lg shadow-lg z-50">
+        <span data-translate="install_hint_text">點擊右上角圖標，即可將應用程式下載到手機桌面！</span>
+        <div class="absolute -top-1 right-4 w-3 h-3 bg-blue-500 transform rotate-45"></div>
+    </div>
+
 
     <div class="container mx-auto max-w-2xl p-4 relative pb-24">
         <div class="flex justify-end items-center gap-2 mb-4">
@@ -235,12 +253,12 @@
                 <h3 class="text-lg font-semibold text-gray-700 mb-3" data-translate="daily_tips_title">💡 今日烹饪小贴士</h3>
                 <div class="grid md:grid-cols-2 gap-4 text-sm">
                     <div class="bg-white p-3 rounded-lg shadow-sm">
-                        <h4 class="font-medium text-green-600 mb-1">🥬 食材保存</h4>
-                        <p class="text-gray-600">绿叶蔬菜用湿纸巾包裹后放入保鲜袋，可延长3-5天新鲜度</p>
+                        <h4 class="font-medium text-green-600 mb-1" data-translate="tip_storage_title">🥬 食材保存</h4>
+                        <p class="text-gray-600" data-translate="tip_storage_content">绿叶蔬菜用湿纸巾包裹后放入保鲜袋，可延长3-5天新鲜度</p>
                     </div>
                     <div class="bg-white p-3 rounded-lg shadow-sm">
-                        <h4 class="font-medium text-blue-600 mb-1">🧂 调味技巧</h4>
-                        <p class="text-gray-600">炒菜时盐要分两次放：炒制中期少许，起锅前调味</p>
+                        <h4 class="font-medium text-blue-600 mb-1" data-translate="tip_seasoning_title">🧂 调味技巧</h4>
+                        <p class="text-gray-600" data-translate="tip_seasoning_content">炒菜时盐要分两次放：炒制中期少许，起锅前调味</p>
                     </div>
                 </div>
             </div>
@@ -428,7 +446,9 @@
                 about_title: "關於我們", about_content: "Fridge To Feast 誕生於一個簡單的想法：讓烹飪變得更有趣、更輕鬆，並減少食物浪費。我們利用先進的 AI 技術，將您冰箱中零散的食材，轉化為令人驚喜的美味佳餚。無論您是烹飪新手還是經驗豐富的廚師，我們都希望能激發您的烹飪靈感，讓每一餐都成為一場盛宴。",
                 faq_title: "常見問題", faq_q1_title: "Q1: 這個服務是免費的嗎？", faq_q1_content: "是的，我們的核心食譜生成功能完全免費。我們通過網站上的廣告來維持運營，感謝您的支持。", faq_q2_title: "Q2: AI 生成的食譜可靠嗎？", faq_q2_content: "我們的 AI 經過大量食譜數據的訓練，能提供富有創意且實用的烹飪建議。但 AI 並非完美，我們建議您在烹飪時仍可根據自己的口味和經驗進行微調。", faq_q3_title: "Q3: 為什麼有時候生成食譜會失敗？", faq_q3_content: "由於 AI 服務器需要巨大的計算資源，在高峰時段（如晚餐時間）可能會出現擁堵或響應緩慢。如果遇到這種情況，請稍後再試，或嘗試使用我們推薦的熱門搜尋。", faq_q4_title: "Q4: 我可以保存我喜歡的食譜嗎？", faq_q4_content: "當然可以！在每個食譜卡的右上角都有一個星號按鈕，點擊即可將食譜收藏到「我的最愛」，方便您隨時查看，即使在離線狀態下也可以。", faq_q5_title: "Q5: 圖片是真實拍攝的嗎？", faq_q5_content: "食譜圖片是由 AI 根據食譜內容生成的，旨在為您提供菜品外觀的靈感，僅供參考。實際成品可能會因食材和烹飪技巧而有所不同。",
                 terms_title: "服務條款", terms_content: "歡迎使用 Fridge To Feast！使用本網站即表示您同意以下條款：本服務提供的所有食譜和建議僅供參考，使用者應自行判斷其適用性與安全性。我們不對因使用本網站內容而導致的任何直接或間接損失負責。我們保留隨時修改或終止服務的權利，恕不另行通知。禁止任何濫用本服務（如惡意爬取數據）的行為。",
-                privacy_title: "隱私政策", privacy_content: "本隱私政策（最後更新於2025年8月16日）旨在說明我們如何收集、使用和保護您的信息。我們尊重您的隱私權，並致力於保護您的個人數據。我們通過 Google Analytics 收集匿名的使用數據（如頁面瀏覽量、設備類型），以改善服務質量，這些數據不包含個人身份信息。我們使用瀏覽器的 LocalStorage 技術來保存您的語言偏好和收藏的食譜，這些信息僅存儲在您的設備上，我們無法訪問。我們使用 Google AdSense 展示廣告，Google 可能會根據您的瀏覽行為使用 Cookie 來投放個性化廣告。您可以通過 Google 的廣告設置來管理您的廣告偏好。我們承諾不會將您的任何數據出售或分享給第三方。若您對本政策有任何疑問，請與我們聯繫。"
+                privacy_title: "隱私政策", privacy_content: "本隱私政策（最後更新於2025年8月16日）旨在說明我們如何收集、使用和保護您的信息。我們尊重您的隱私權，並致力於保護您的個人數據。我們通過 Google Analytics 收集匿名的使用數據（如頁面瀏覽量、設備類型），以改善服務質量，這些數據不包含個人身份信息。我們使用瀏覽器的 LocalStorage 技術來保存您的語言偏好和收藏的食譜，這些信息僅存儲在您的設備上，我們無法訪問。我們使用 Google AdSense 展示廣告，Google 可能會根據您的瀏覽行為使用 Cookie 來投放個性化廣告。您可以通過 Google 的廣告設置來管理您的廣告偏好。我們承諾不會將您的任何數據出售或分享給第三方。若您對本政策有任何疑問，請與我們聯繫。",
+                tip_storage_title: "🥬 食材保存", tip_storage_content: "绿叶蔬菜用湿纸巾包裹后放入保鲜袋，可延长3-5天新鲜度", tip_seasoning_title: "🧂 调味技巧", tip_seasoning_content: "炒菜时盐要分两次放：炒制中期少许，起锅前调味",
+                install_hint_text: "點擊右上角圖標，即可將應用程式下載到手機桌面！"
             },
             en: { 
                 lang_switcher: "中文", main_title: "Fridge To Feast", subtitle: "Enter ingredients for ideas, or search for a recipe directly!", input_placeholder: "e.g., egg, tomato", start_button: "Start", thinking: "Thinking...", generating_recipe: "Generating Recipe...", generating_image: "Creating Image...", art_director: "Hiring Art Director...", how_to_cook: "How would you like to cook it?", ai_creative_style: "AI Creative Style", image_ref_note: "Image for reference only", calories_label: "Est. Calories", calories_note: "(approx.)", ingredients_label: "Ingredients", instructions_label: "Instructions", error_title: "Oh no, an error occurred!", error_title_busy: "AI Chef is Busy!", error_busy_text: "Server is currently busy. Please try again later. Consider saving recipes you like to your favorites!", error_input_required: "Please enter ingredients or a recipe name!", error_generic: "Could not process your request. Please try again later.", error_recipe_gen: "Failed to generate recipe. Please try again later.", error_timeout: "Request timed out, server is responding slowly.", error_network: "Network connection issue, please check your internet connection.", step_label: "Step", pref_vegetarian: "Vegetarian", pref_low_calorie: "Low-Calorie", pref_spicy: "Spicy", welcome_title: "Welcome to Fridge To Feast!", welcome_text: "Stop wondering what to cook with the ingredients in your fridge. We use AI to create delicious recipes, turning your leftovers into a feast!", how_to_use_title: "How to Use?", step1_text: "Enter the ingredients you have in the search bar above (e.g., egg, tomato, onion).", step2_text: "Select your dietary preferences (e.g., Vegetarian, Spicy).", step3_text: "Click 'Start' and let us work our magic!", popular_searches_title: "Popular Searches", my_favorites: "My Favorites", favorites_title: "My Favorite Recipes", no_favorites_text: "You haven't saved any recipes yet. When you find a recipe you like, click the star icon to save it!", favorite_reminder: "Like this recipe? Tap the star to save it for offline access!", retry_text: "Retry", retrying_text: "Retrying...", back_home: "Back to Home", warm_reminder_title: "💡 Friendly Reminder", warm_reminder_text: "This site uses real AI to generate recipes, not traditional search functions. We strive to create unique culinary inspiration for you, but our AI servers may occasionally be busy. Please be patient with us. We recommend saving your favorite recipes for easy access anytime!", daily_tips_title: "💡 Daily Cooking Tips", nutrition_tips_title: "🌟 Nutrition Pairing Knowledge", healthy_eating_title: "🍽️ Healthy Eating Guide",
@@ -436,7 +456,9 @@
                 about_title: "About Us", about_content: "Fridge To Feast was born from a simple idea: make cooking more fun, easier, and reduce food waste. We use advanced AI technology to transform the scattered ingredients in your fridge into surprisingly delicious meals. Whether you're a novice cook or an experienced chef, we hope to inspire your culinary creativity and turn every meal into a feast.",
                 faq_title: "Frequently Asked Questions", faq_q1_title: "Q1: Is this service free?", faq_q1_content: "Yes, our core recipe generation feature is completely free. We sustain our operations through advertisements on the site and appreciate your support.", faq_q2_title: "Q2: Are the AI-generated recipes reliable?", faq_q2_content: "Our AI is trained on a vast amount of recipe data to provide creative and practical cooking suggestions. However, AI is not perfect, and we recommend you adjust the recipes based on your own taste and experience.", faq_q3_title: "Q3: Why does recipe generation sometimes fail?", faq_q3_content: "Since the AI server requires significant computing resources, it may become congested or slow to respond during peak hours (like dinner time). If this happens, please try again later or use our popular search suggestions.", faq_q4_title: "Q4: Can I save recipes I like?", faq_q4_content: "Absolutely! There is a star icon in the top-right corner of each recipe card. Click it to save the recipe to 'My Favorites' for easy access anytime, even offline.", faq_q5_title: "Q5: Are the images real photos?", faq_q5_content: "The recipe images are generated by AI based on the recipe's content to provide visual inspiration. They are for reference only. The actual dish may vary depending on ingredients and cooking techniques.",
                 terms_title: "Terms of Service", terms_content: "Welcome to Fridge To Feast! By using this website, you agree to the following terms: All recipes and suggestions provided are for reference only. Users should judge their suitability and safety. We are not responsible for any direct or indirect loss resulting from the use of this site's content. We reserve the right to modify or terminate the service at any time without notice. Any misuse of the service (e.g., malicious data scraping) is prohibited.",
-                privacy_title: "Privacy Policy", privacy_content: "This Privacy Policy (last updated August 16, 2025) explains how we collect, use, and protect your information. We respect your privacy and are committed to protecting your personal data. We collect anonymous usage data (e.g., page views, device type) through Google Analytics to improve our service; this data does not contain personally identifiable information. We use your browser's LocalStorage to save your language preferences and favorite recipes, which are stored only on your device and are inaccessible to us. We use Google AdSense for advertising, and Google may use cookies to serve personalized ads based on your browsing behavior. You can manage your ad preferences through Google's Ad Settings. We will not sell or share your data with third parties. If you have any questions about this policy, please contact us."
+                privacy_title: "Privacy Policy", privacy_content: "This Privacy Policy (last updated August 16, 2025) explains how we collect, use, and protect your information. We respect your privacy and are committed to protecting your personal data. We collect anonymous usage data (e.g., page views, device type) through Google Analytics to improve our service; this data does not contain personally identifiable information. We use your browser's LocalStorage to save your language preferences and favorite recipes, which are stored only on your device and are inaccessible to us. We use Google AdSense for advertising, and Google may use cookies to serve personalized ads based on your browsing behavior. You can manage your ad preferences through Google's Ad Settings. We will not sell or share your data with third parties. If you have any questions about this policy, please contact us.",
+                tip_storage_title: "🥬 Ingredient Storage", tip_storage_content: "Wrap leafy greens in a damp paper towel and place them in a plastic bag to extend freshness by 3-5 days.", tip_seasoning_title: "🧂 Seasoning Tips", tip_seasoning_content: "When stir-frying, add salt in two stages: a little during the middle of cooking, and the rest to taste just before serving.",
+                install_hint_text: "Tap the icon in the top right to add the app to your home screen!"
             }
         };
         let currentLanguage = localStorage.getItem('fridgeToFeastLang') || 'zh';
@@ -713,7 +735,7 @@
             document.querySelectorAll('[data-translate]').forEach(el => {
                 const key = el.getAttribute('data-translate');
                 if (translations[lang][key]) { 
-                    el.textContent = translations[lang][key]; 
+                    el.innerHTML = translations[lang][key]; // Use innerHTML to support icons
                 }
             });
             langSwitcherBtn.textContent = translations[lang].lang_switcher;
@@ -1430,11 +1452,39 @@
                 });
             });
         }
+        
+        // --- PWA 安装提示處理 ---
+        function setupPwaInstall() {
+            let deferredPrompt;
+            const installHint = document.getElementById('install-hint');
+
+            window.addEventListener('beforeinstallprompt', (e) => {
+                // 防止 Chrome 67 及更早版本自动显示安装提示
+                e.preventDefault();
+                // 存储事件以便稍后触发
+                deferredPrompt = e;
+                // 显示我们自定义的提示
+                if (installHint) {
+                    console.log("PWA is installable, showing hint.");
+                    installHint.classList.remove('hidden');
+                }
+            });
+            
+            window.addEventListener('appinstalled', () => {
+                // 隐藏提示因为应用已经被安装
+                if (installHint) {
+                    installHint.classList.add('hidden');
+                }
+                console.log('PWA was installed');
+            });
+        }
+
 
         document.addEventListener('DOMContentLoaded', () => {
             setLanguage(currentLanguage);
             showInitialContent();
             setupModals();
+            setupPwaInstall();
             
             recipeCache.preloadPopularRecipes();
             
